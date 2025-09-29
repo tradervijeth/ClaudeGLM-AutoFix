@@ -54,8 +54,10 @@ setup_user_bin() {
             echo "export PATH=\"\$PATH:$USER_BIN_DIR\"" >> "$rc_file"
         fi
         
-        echo "⚠️  IMPORTANT: Run this after installation to update PATH:"
+        echo ""
+        echo "⚠️  IMPORTANT: You will need to run this command after installation:"
         echo "   source $rc_file"
+        echo ""
     fi
 }
 
@@ -338,17 +340,22 @@ main() {
     echo ""
     echo "✅ Installation complete!"
     echo ""
-    echo "📝 Next steps:"
+    echo "=========================================="
+    echo "⚡ IMPORTANT: Run this command now:"
+    echo "=========================================="
     echo ""
-    echo "1. Update your PATH (REQUIRED):"
     echo "   source $rc_file"
     echo ""
-    echo "2. Available commands:"
+    echo "=========================================="
+    echo ""
+    echo "📝 After sourcing, you can use:"
+    echo ""
+    echo "Commands:"
     echo "   claude-glm      - GLM-4.5 (standard)"
     echo "   claude-glm-fast - GLM-4.5-Air (fast)"
     echo "   claude-anthropic - Original Claude"
     echo ""
-    echo "3. Aliases (after sourcing):"
+    echo "Aliases:"
     echo "   ccg - claude-glm"
     echo "   ccf - claude-glm-fast"
     echo "   cca - claude-anthropic"
