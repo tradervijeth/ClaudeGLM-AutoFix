@@ -20,7 +20,7 @@ A convenient wrapper for using [Z.AI's GLM models](https://z.ai) with [Claude Co
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/yourusername/claude-glm-wrapper.git
+git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
 cd claude-glm-wrapper
 ```
 
