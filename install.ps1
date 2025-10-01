@@ -383,35 +383,46 @@ function Report-Error {
     # Get additional context
     $claudeFound = if (Get-Command claude -ErrorAction SilentlyContinue) { "Yes" } else { "No" }
 
-    # Build error report
-    $issueBody = @"
-## Installation Error (Windows PowerShell)
+    # Build error report (using string concatenation to avoid here-string parsing issues)
+    $issueBody = "## Installation Error (Windows PowerShell)`n`n"
+    $issueBody += "**OS:** $osInfo`n"
+    $issueBody += "**PowerShell:** $psVersion`n"
+    $issueBody += "**Timestamp:** $timestamp`n`n"
+    $issueBody += "### Error Details:`n"
+    $issueBody += "``````n"
+    $issueBody += "$sanitizedError`n"
+    $issueBody += "``````n`n"
 
-**OS:** $osInfo
-**PowerShell:** $psVersion
-**Timestamp:** $timestamp
+    if ($ErrorLine) {
+        $issueBody += "**Error Location:** $ErrorLine`n`n"
+    }
 
-### Error Details:
-``````
-$sanitizedError
-``````
+    $issueBody += "### System Information:`n"
+    $issueBody += "- Installation Location: $UserBinDir`n"
+    $issueBody += "- Claude Code Found: $claudeFound`n"
 
-$(if ($ErrorLine) { "**Error Location:** $ErrorLine`n" })
+    try {
+        $execPolicy = Get-ExecutionPolicy -Scope CurrentUser -ErrorAction SilentlyContinue
+        $issueBody += "- PowerShell Execution Policy: $execPolicy`n"
+    } catch {
+        $issueBody += "- PowerShell Execution Policy: Unknown`n"
+    }
 
-### System Information:
-- Installation Location: $UserBinDir
-- Claude Code Found: $claudeFound
-- PowerShell Execution Policy: $(Get-ExecutionPolicy -Scope CurrentUser)
+    $issueBody += "`n### Additional Context:`n"
 
-### Additional Context:
-$(if ($ErrorRecord) {
-"- Exception Type: $($ErrorRecord.Exception.GetType().FullName)
-- Category: $($ErrorRecord.CategoryInfo.Category)"
-})
+    if ($ErrorRecord) {
+        try {
+            $exceptionType = $ErrorRecord.Exception.GetType().FullName
+            $category = $ErrorRecord.CategoryInfo.Category
+            $issueBody += "- Exception Type: $exceptionType`n"
+            $issueBody += "- Category: $category`n"
+        } catch {
+            $issueBody += "- Additional error details unavailable`n"
+        }
+    }
 
----
-*This error was automatically reported by the installer. Please add any additional context below.*
-"@
+    $issueBody += "`n---`n"
+    $issueBody += "*This error was automatically reported by the installer. Please add any additional context below.*"
 
     # URL encode the body (PowerShell 5+ compatible)
     Add-Type -AssemblyName System.Web
