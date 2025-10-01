@@ -1,10 +1,29 @@
 # Claude-GLM PowerShell Installer for Windows
 # Works without admin rights, installs to user's profile directory
+#
+# Usage with parameters when downloading:
+#   Test error reporting:
+#     $env:CLAUDE_GLM_TEST_ERROR=1; iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.ps1 | iex; $env:CLAUDE_GLM_TEST_ERROR=$null
+#
+#   Enable debug mode:
+#     $env:CLAUDE_GLM_DEBUG=1; iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.ps1 | iex; $env:CLAUDE_GLM_DEBUG=$null
+#
+# Usage when running locally:
+#   .\install.ps1 -TestError
+#   .\install.ps1 -Debug
 
 param(
     [switch]$TestError,
     [switch]$Debug
 )
+
+# Support environment variables for parameters when using iwr | iex
+if ($env:CLAUDE_GLM_TEST_ERROR -eq "1" -or $env:CLAUDE_GLM_TEST_ERROR -eq "true") {
+    $TestError = $true
+}
+if ($env:CLAUDE_GLM_DEBUG -eq "1" -or $env:CLAUDE_GLM_DEBUG -eq "true") {
+    $Debug = $true
+}
 
 # Configuration
 $UserBinDir = "$env:USERPROFILE\.local\bin"
@@ -654,6 +673,12 @@ if ($TestError) {
     Write-Host "🧪 Testing error reporting functionality..." -ForegroundColor Magenta
     Write-Host ""
 
+    # Show how script was invoked
+    if ($env:CLAUDE_GLM_TEST_ERROR) {
+        Write-Host "   (Invoked via environment variable)" -ForegroundColor Gray
+    }
+    Write-Host ""
+
     # Create a test error
     $testErrorMessage = "This is a test error to verify error reporting works correctly"
     $testErrorLine = "Test mode - no actual error"
@@ -666,6 +691,9 @@ if ($TestError) {
     }
 
     Write-Host "✅ Test complete. If a browser window opened, error reporting is working!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "To run normal installation, use:" -ForegroundColor Gray
+    Write-Host "   iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.ps1 | iex" -ForegroundColor Cyan
     exit 0
 }
 
