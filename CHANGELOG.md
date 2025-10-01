@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2025-10-01
+
+### Changed
+- Removed global installation support - npx only
+- Updated preinstall script to block ALL installation methods (local and global)
+- Clearer error messaging emphasizing npx as the only supported method
+
 ## [1.0.2] - 2025-10-01
 
 ### Added
@@ -64,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Subexpression parsing errors in piped contexts
 - Terminal/PowerShell window persistence after errors
 
-[Unreleased]: https://github.com/JoeInnsp23/claude-glm-wrapper/compare/v1.0.2...HEAD
+[Unreleased]: https://github.com/JoeInnsp23/claude-glm-wrapper/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/JoeInnsp23/claude-glm-wrapper/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/JoeInnsp23/claude-glm-wrapper/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/JoeInnsp23/claude-glm-wrapper/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/JoeInnsp23/claude-glm-wrapper/releases/tag/v1.0.0

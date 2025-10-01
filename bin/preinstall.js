@@ -2,7 +2,7 @@
 
 /**
  * Preinstall script to prevent incorrect installation method
- * This package should be run with npx, not installed as a dependency
+ * This package should ONLY be run with npx, not installed
  */
 
 // Check if being installed as a dependency vs run via npx
@@ -10,23 +10,20 @@
 const isNpxInstall = process.env.npm_execpath && process.env.npm_execpath.includes('npx');
 const isTempInstall = process.env.npm_config_cache && process.cwd().includes('_npx');
 
-// Also check if being installed globally (which is acceptable)
-const isGlobalInstall = process.env.npm_config_global === 'true';
-
-// If it's being installed as a local dependency, show warning and exit
-if (!isNpxInstall && !isTempInstall && !isGlobalInstall) {
+// Block ALL installation attempts (local and global)
+if (!isNpxInstall && !isTempInstall) {
   console.error('\n❌ ERROR: Incorrect installation method!\n');
-  console.error('This package is meant to be run directly with npx, not installed as a dependency.\n');
+  console.error('This package is meant to be run directly with npx only.\n');
   console.error('✅ Correct usage:');
   console.error('   npx claude-glm-installer\n');
-  console.error('❌ Do NOT use:');
+  console.error('❌ Do NOT install this package:');
   console.error('   npm install claude-glm-installer');
-  console.error('   npm i claude-glm-installer\n');
-  console.error('For global installation, use:');
+  console.error('   npm i claude-glm-installer');
   console.error('   npm install -g claude-glm-installer\n');
+  console.error('Always use npx to run the latest version!\n');
 
   process.exit(1);
 }
 
-// Allow installation to proceed for npx or global installs
+// Allow installation to proceed only for npx
 process.exit(0);
