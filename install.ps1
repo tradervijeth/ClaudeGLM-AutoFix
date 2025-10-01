@@ -707,16 +707,17 @@ if ($TestError) {
     Write-Host ""
     Write-Host "Press Enter to finish (window will remain open)..." -ForegroundColor Gray
     $null = Read-Host
-    # Return to stop script execution without closing window
-    return
+    # Script will not continue to installation - test mode ends here
 }
 
-# Run installation with error handling
-try {
-    $ErrorActionPreference = "Stop"
-    Write-DebugLog "Starting installation with ErrorActionPreference = Stop"
-    Install-ClaudeGlm
-} catch {
+# Only run installation if not in test mode
+if (-not $TestError) {
+    # Run installation with error handling
+    try {
+        $ErrorActionPreference = "Stop"
+        Write-DebugLog "Starting installation with ErrorActionPreference = Stop"
+        Install-ClaudeGlm
+    } catch {
     $errorMessage = $_.Exception.Message
     $errorLine = if ($_.InvocationInfo.ScriptLineNumber) {
         $lineNum = $_.InvocationInfo.ScriptLineNumber
@@ -736,4 +737,5 @@ try {
     $null = Read-Host
     # Return to stop script execution without closing window
     return
+    }
 }
