@@ -9,6 +9,105 @@ GLM_45_CONFIG_DIR="$HOME/.claude-glm-45"
 GLM_FAST_CONFIG_DIR="$HOME/.claude-glm-fast"
 ZAI_API_KEY="YOUR_ZAI_API_KEY_HERE"
 
+# Report installation errors to GitHub
+report_error() {
+    local error_msg="$1"
+    local error_line="$2"
+    local error_code="$3"
+
+    echo ""
+    echo "❌ Installation failed!"
+    echo ""
+
+    # Collect system information
+    local os_info="$(uname -s) $(uname -r) ($(uname -m))"
+    local shell_info="bash $BASH_VERSION"
+    local timestamp=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+
+    # Sanitize error message (remove API keys)
+    local sanitized_error=$(echo "$error_msg" | sed \
+        -e 's/ANTHROPIC_AUTH_TOKEN="[^"]*"/ANTHROPIC_AUTH_TOKEN="[REDACTED]"/g' \
+        -e 's/ZAI_API_KEY="[^"]*"/ZAI_API_KEY="[REDACTED]"/g' \
+        -e 's/\$ZAI_API_KEY="[^"]*"/\$ZAI_API_KEY="[REDACTED]"/g')
+
+    # Get additional context
+    local claude_found="No"
+    if command -v claude &> /dev/null; then
+        claude_found="Yes ($(which claude))"
+    fi
+
+    # Build error report
+    local issue_body="## Installation Error (Unix/Linux/macOS)
+
+**OS:** $os_info
+**Shell:** $shell_info
+**Timestamp:** $timestamp
+
+### Error Details:
+\`\`\`
+$sanitized_error
+\`\`\`
+"
+
+    if [ -n "$error_line" ]; then
+        issue_body+="
+**Error Location:** $error_line
+"
+    fi
+
+    if [ -n "$error_code" ]; then
+        issue_body+="
+**Exit Code:** $error_code
+"
+    fi
+
+    issue_body+="
+### System Information:
+- Installation Location: $USER_BIN_DIR
+- Claude Code Found: $claude_found
+- PATH: \`$(echo $PATH | sed 's/:/\n  /g')\`
+
+---
+*This error was automatically reported by the installer. Please add any additional context below.*
+"
+
+    # URL encode using Python (most compatible)
+    local encoded_body=""
+    local encoded_title=""
+
+    if command -v python3 &> /dev/null; then
+        encoded_body=$(python3 -c "import urllib.parse; print(urllib.parse.quote('''$issue_body'''))" 2>/dev/null)
+        encoded_title=$(python3 -c "import urllib.parse; print(urllib.parse.quote('Installation Error: Unix/Linux/macOS'))" 2>/dev/null)
+    elif command -v python &> /dev/null; then
+        encoded_body=$(python -c "import urllib; print urllib.quote('''$issue_body''')" 2>/dev/null)
+        encoded_title=$(python -c "import urllib; print urllib.quote('Installation Error: Unix/Linux/macOS')" 2>/dev/null)
+    else
+        # Fallback: basic URL encoding with sed
+        encoded_body=$(echo "$issue_body" | sed 's/ /%20/g; s/\n/%0A/g')
+        encoded_title="Installation%20Error%3A%20Unix%2FLinux%2FmacOS"
+    fi
+
+    local issue_url="https://github.com/JoeInnsp23/claude-glm-wrapper/issues/new?title=${encoded_title}&body=${encoded_body}&labels=bug,unix,installation"
+
+    echo "📋 Error details have been prepared for reporting."
+    echo ""
+    echo "Please report this error by opening the following URL:"
+    echo "$issue_url"
+    echo ""
+    echo "Attempting to open in your browser..."
+
+    # Try to open in browser
+    if command -v xdg-open &> /dev/null; then
+        xdg-open "$issue_url" 2>/dev/null || echo "⚠️  Could not open browser automatically. Please copy and paste the URL above."
+    elif command -v open &> /dev/null; then
+        open "$issue_url" 2>/dev/null || echo "⚠️  Could not open browser automatically. Please copy and paste the URL above."
+    else
+        echo "⚠️  Could not open browser automatically. Please copy and paste the URL above."
+    fi
+
+    echo ""
+}
+
 # Find all existing wrapper installations
 find_all_installations() {
     local locations=(
@@ -521,6 +620,28 @@ main() {
     echo "📁 Installation location: $USER_BIN_DIR"
     echo "📁 Config directories: ~/.claude-glm, ~/.claude-glm-45, ~/.claude-glm-fast"
 }
+
+# Error handler
+handle_error() {
+    local exit_code=$?
+    local line_number=$1
+    local bash_command="$2"
+
+    # Capture the error details
+    local error_msg="Command failed with exit code $exit_code"
+    if [ -n "$bash_command" ]; then
+        error_msg="$error_msg: $bash_command"
+    fi
+
+    local error_location="Line $line_number in install.sh"
+
+    report_error "$error_msg" "$error_location" "$exit_code"
+    exit $exit_code
+}
+
+# Set up error handling
+set -eE  # Exit on error, inherit ERR trap in functions
+trap 'handle_error ${LINENO} "$BASH_COMMAND"' ERR
 
 # Run installation
 main "$@"

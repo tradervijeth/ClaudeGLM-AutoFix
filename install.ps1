@@ -352,6 +352,91 @@ function Test-ClaudeInstallation {
     }
 }
 
+# Report installation errors to GitHub
+function Report-Error {
+    param(
+        [string]$ErrorMessage,
+        [string]$ErrorLine = "",
+        [object]$ErrorRecord = $null
+    )
+
+    Write-Host ""
+    Write-Host "❌ Installation failed!" -ForegroundColor Red
+    Write-Host ""
+
+    # Collect system information
+    $osInfo = try {
+        $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
+        "Windows $($os.Version) ($($os.Caption))"
+    } catch {
+        "Windows (version unknown)"
+    }
+
+    $psVersion = $PSVersionTable.PSVersion.ToString()
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+
+    # Sanitize error message (remove API keys)
+    $sanitizedError = $ErrorMessage -replace 'ANTHROPIC_AUTH_TOKEN["\s]*=["\s]*[^";\s]+', 'ANTHROPIC_AUTH_TOKEN="[REDACTED]"'
+    $sanitizedError = $sanitizedError -replace 'ZaiApiKey["\s]*=["\s]*[^";\s]+', 'ZaiApiKey="[REDACTED]"'
+    $sanitizedError = $sanitizedError -replace '\$ZaiApiKey\s*=\s*"[^"]+"', '$ZaiApiKey="[REDACTED]"'
+
+    # Get additional context
+    $claudeFound = if (Get-Command claude -ErrorAction SilentlyContinue) { "Yes" } else { "No" }
+
+    # Build error report
+    $issueBody = @"
+## Installation Error (Windows PowerShell)
+
+**OS:** $osInfo
+**PowerShell:** $psVersion
+**Timestamp:** $timestamp
+
+### Error Details:
+``````
+$sanitizedError
+``````
+
+$(if ($ErrorLine) { "**Error Location:** $ErrorLine`n" })
+
+### System Information:
+- Installation Location: $UserBinDir
+- Claude Code Found: $claudeFound
+- PowerShell Execution Policy: $(Get-ExecutionPolicy -Scope CurrentUser)
+
+### Additional Context:
+$(if ($ErrorRecord) {
+"- Exception Type: $($ErrorRecord.Exception.GetType().FullName)
+- Category: $($ErrorRecord.CategoryInfo.Category)"
+})
+
+---
+*This error was automatically reported by the installer. Please add any additional context below.*
+"@
+
+    # URL encode the body (PowerShell 5+ compatible)
+    Add-Type -AssemblyName System.Web
+    $encodedBody = [System.Web.HttpUtility]::UrlEncode($issueBody)
+    $encodedTitle = [System.Web.HttpUtility]::UrlEncode("Installation Error: Windows PowerShell")
+
+    $issueUrl = "https://github.com/JoeInnsp23/claude-glm-wrapper/issues/new?title=$encodedTitle&body=$encodedBody&labels=bug,windows,installation"
+
+    Write-Host "📋 Error details have been prepared for reporting."
+    Write-Host ""
+    Write-Host "Please report this error by opening the following URL:"
+    Write-Host $issueUrl -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Attempting to open in your browser..." -ForegroundColor Gray
+
+    try {
+        Start-Process $issueUrl
+        Write-Host "✅ Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+    } catch {
+        Write-Host "⚠️  Could not open browser automatically. Please copy and paste the URL above." -ForegroundColor Yellow
+    }
+
+    Write-Host ""
+}
+
 # Main installation
 function Install-ClaudeGlm {
     Write-Host "🔧 Claude-GLM PowerShell Installer for Windows"
@@ -464,5 +549,18 @@ function Install-ClaudeGlm {
     Write-Host "📁 Config directories: $GlmConfigDir, $Glm45ConfigDir, $GlmFastConfigDir"
 }
 
-# Run installation
-Install-ClaudeGlm
+# Run installation with error handling
+try {
+    $ErrorActionPreference = "Stop"
+    Install-ClaudeGlm
+} catch {
+    $errorMessage = $_.Exception.Message
+    $errorLine = if ($_.InvocationInfo.ScriptLineNumber) {
+        "Line $($_.InvocationInfo.ScriptLineNumber) in $($_.InvocationInfo.ScriptName)"
+    } else {
+        "Unknown location"
+    }
+
+    Report-Error -ErrorMessage $errorMessage -ErrorLine $errorLine -ErrorRecord $_
+    exit 1
+}
