@@ -426,8 +426,8 @@ function Report-Error {
     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
 
     # Sanitize error message (remove API keys)
-    $sanitizedError = $ErrorMessage -replace 'ANTHROPIC_AUTH_TOKEN[\s"]*=[\s"]*[^";\s]+', 'ANTHROPIC_AUTH_TOKEN="[REDACTED]"'
-    $sanitizedError = $sanitizedError -replace 'ZaiApiKey[\s"]*=[\s"]*[^";\s]+', 'ZaiApiKey="[REDACTED]"'
+    $sanitizedError = $ErrorMessage -replace 'ANTHROPIC_AUTH_TOKEN\s*=\s*\S+', 'ANTHROPIC_AUTH_TOKEN="[REDACTED]"'
+    $sanitizedError = $sanitizedError -replace 'ZaiApiKey\s*=\s*\S+', 'ZaiApiKey="[REDACTED]"'
     $sanitizedError = $sanitizedError -replace '\$ZaiApiKey\s*=\s*"[^"]+"', '$ZaiApiKey="[REDACTED]"'
 
     # Get additional context
