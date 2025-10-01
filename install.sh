@@ -1,6 +1,44 @@
 #!/bin/bash
 # Claude-GLM Server-Friendly Installer
 # Works without sudo, installs to user's home directory
+#
+# Usage:
+#   Test error reporting:
+#     CLAUDE_GLM_TEST_ERROR=1 bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
+#     OR: ./install.sh --test-error
+#
+#   Enable debug mode:
+#     CLAUDE_GLM_DEBUG=1 bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
+#     OR: ./install.sh --debug
+
+# Parse command-line arguments
+TEST_ERROR=false
+DEBUG=false
+
+for arg in "$@"; do
+    case $arg in
+        --test-error)
+            TEST_ERROR=true
+            shift
+            ;;
+        --debug)
+            DEBUG=true
+            shift
+            ;;
+        *)
+            # Unknown option
+            ;;
+    esac
+done
+
+# Support environment variables for parameters
+if [ "$CLAUDE_GLM_TEST_ERROR" = "1" ] || [ "$CLAUDE_GLM_TEST_ERROR" = "true" ]; then
+    TEST_ERROR=true
+fi
+
+if [ "$CLAUDE_GLM_DEBUG" = "1" ] || [ "$CLAUDE_GLM_DEBUG" = "true" ]; then
+    DEBUG=true
+fi
 
 # Configuration
 USER_BIN_DIR="$HOME/.local/bin"
@@ -16,7 +54,9 @@ report_error() {
     local error_code="$3"
 
     echo ""
+    echo "============================================="
     echo "❌ Installation failed!"
+    echo "============================================="
     echo ""
 
     # Collect system information
@@ -29,6 +69,29 @@ report_error() {
         -e 's/ANTHROPIC_AUTH_TOKEN="[^"]*"/ANTHROPIC_AUTH_TOKEN="[REDACTED]"/g' \
         -e 's/ZAI_API_KEY="[^"]*"/ZAI_API_KEY="[REDACTED]"/g' \
         -e 's/\$ZAI_API_KEY="[^"]*"/\$ZAI_API_KEY="[REDACTED]"/g')
+
+    # Display error details to user
+    echo "Error Details:"
+    echo "$sanitized_error"
+    if [ -n "$error_line" ]; then
+        echo "Location: $error_line"
+    fi
+    echo ""
+
+    # Ask if user wants to report the error
+    echo "Would you like to report this error to GitHub?"
+    echo "This will open your browser with a pre-filled issue report."
+    read -p "Report error? (y/n): " report_choice
+    echo ""
+
+    if [ "$report_choice" != "y" ] && [ "$report_choice" != "Y" ]; then
+        echo "Error not reported. You can get help at:"
+        echo "  https://github.com/JoeInnsp23/claude-glm-wrapper/issues"
+        echo ""
+        echo "Press Enter to finish..."
+        read
+        return
+    fi
 
     # Get additional context
     local claude_found="No"
@@ -91,21 +154,39 @@ $sanitized_error
 
     echo "📋 Error details have been prepared for reporting."
     echo ""
-    echo "Please report this error by opening the following URL:"
-    echo "$issue_url"
-    echo ""
-    echo "Attempting to open in your browser..."
 
     # Try to open in browser
+    local browser_opened=false
     if command -v xdg-open &> /dev/null; then
-        xdg-open "$issue_url" 2>/dev/null || echo "⚠️  Could not open browser automatically. Please copy and paste the URL above."
+        if xdg-open "$issue_url" 2>/dev/null; then
+            browser_opened=true
+            echo "✅ Browser opened with pre-filled error report."
+        fi
     elif command -v open &> /dev/null; then
-        open "$issue_url" 2>/dev/null || echo "⚠️  Could not open browser automatically. Please copy and paste the URL above."
-    else
-        echo "⚠️  Could not open browser automatically. Please copy and paste the URL above."
+        if open "$issue_url" 2>/dev/null; then
+            browser_opened=true
+            echo "✅ Browser opened with pre-filled error report."
+        fi
+    fi
+
+    if [ "$browser_opened" = false ]; then
+        echo "⚠️  Could not open browser automatically."
+        echo ""
+        echo "Please copy and open this URL manually:"
+        echo "$issue_url"
     fi
 
     echo ""
+
+    # Add instructions and wait for user
+    if [ "$browser_opened" = true ]; then
+        echo "Please review the error report in your browser and submit the issue."
+        echo "After submitting (or if you choose not to), return here."
+    fi
+
+    echo ""
+    echo "Press Enter to continue..."
+    read
 }
 
 # Find all existing wrapper installations
@@ -636,12 +717,50 @@ handle_error() {
     local error_location="Line $line_number in install.sh"
 
     report_error "$error_msg" "$error_location" "$exit_code"
-    exit $exit_code
+
+    # Give user time to read any final messages before stopping
+    echo ""
+    echo "Installation terminated due to error."
+    echo "Press Enter to finish (window will remain open)..."
+    read
+    # Return to stop script execution without closing terminal
+    return
 }
+
+# Test error functionality if requested
+if [ "$TEST_ERROR" = true ]; then
+    echo "🔍 TEST: Testing error reporting functionality..."
+    echo ""
+
+    # Show how script was invoked
+    if [ -n "$CLAUDE_GLM_TEST_ERROR" ]; then
+        echo "   (Invoked via environment variable)"
+    fi
+    echo ""
+
+    # Create a test error
+    local test_error_message="This is a test error to verify error reporting works correctly"
+    local test_error_line="Test mode - no actual error"
+
+    report_error "$test_error_message" "$test_error_line" "0"
+
+    echo "✅ Test complete. If a browser window opened, error reporting is working!"
+    echo ""
+    echo "To run normal installation, use:"
+    echo "   curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh | bash"
+    echo ""
+    echo "Press Enter to finish (window will remain open)..."
+    read
+    # Script ends naturally here - terminal stays open
+    exit 0
+fi
 
 # Set up error handling
 set -eE  # Exit on error, inherit ERR trap in functions
 trap 'handle_error ${LINENO} "$BASH_COMMAND"' ERR
 
-# Run installation
-main "$@"
+# Only run installation if not in test mode
+if [ "$TEST_ERROR" != true ]; then
+    # Run installation
+    main "$@"
+fi
