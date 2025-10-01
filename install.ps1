@@ -36,7 +36,7 @@ $ZaiApiKey = "YOUR_ZAI_API_KEY_HERE"
 function Write-DebugLog {
     param([string]$Message)
     if ($Debug) {
-        Write-Host "[DEBUG] $Message" -ForegroundColor Gray
+        Write-Host "DEBUG: $Message" -ForegroundColor Gray
     }
 }
 
@@ -100,16 +100,16 @@ function Remove-OldWrappers {
     }
 
     Write-Host ""
-    Write-Host "[SEARCH] Found existing wrappers in multiple locations:"
+    Write-Host "SEARCH: Found existing wrappers in multiple locations:"
     Write-Host ""
 
     foreach ($wrapper in $oldWrappers) {
-        Write-Host "  [X] $wrapper (old location)"
+        Write-Host "  REMOVED: $wrapper (old location)"
     }
 
     if ($currentWrappers.Count -gt 0) {
         foreach ($wrapper in $currentWrappers) {
-            Write-Host "  [OK] $wrapper (current location)"
+            Write-Host "  OK: $wrapper (current location)"
         }
     }
 
@@ -122,16 +122,16 @@ function Remove-OldWrappers {
         foreach ($wrapper in $oldWrappers) {
             try {
                 Remove-Item -Path $wrapper -Force -ErrorAction Stop
-                Write-Host "  [OK] Removed: $wrapper"
+                Write-Host "  OK: Removed: $wrapper"
             } catch {
-                Write-Host "  [WARNING] Could not remove: $wrapper (permission denied)"
+                Write-Host "  WARNING: Could not remove: $wrapper (permission denied)"
             }
         }
         Write-Host ""
-        Write-Host "[OK] Cleanup complete!"
+        Write-Host "OK: Cleanup complete!"
     } else {
         Write-Host ""
-        Write-Host "[WARNING] Skipping cleanup. Old wrappers may interfere with the new installation."
+        Write-Host "WARNING: Skipping cleanup. Old wrappers may interfere with the new installation."
         Write-Host "   You may want to manually remove them later."
     }
 
@@ -148,7 +148,7 @@ function Setup-UserBin {
     # Check if PATH includes user bin
     $currentPath = [Environment]::GetEnvironmentVariable("PATH", "User")
     if ($currentPath -notlike "*$UserBinDir*") {
-        Write-Host "[INFO] Adding $UserBinDir to PATH..."
+        Write-Host "INFO: Adding $UserBinDir to PATH..."
 
         # Add to user PATH
         $newPath = if ($currentPath) { "$currentPath;$UserBinDir" } else { $UserBinDir }
@@ -158,7 +158,7 @@ function Setup-UserBin {
         $env:PATH = "$env:PATH;$UserBinDir"
 
         Write-Host ""
-        Write-Host "[WARNING] IMPORTANT: PATH has been updated for future sessions."
+        Write-Host "WARNING: IMPORTANT: PATH has been updated for future sessions."
         Write-Host "   For this session, restart PowerShell or run: `$env:PATH += ';$UserBinDir'"
         Write-Host ""
     }
@@ -209,7 +209,7 @@ Set-Alias ccf claude-glm-fast
     $newContent = $filteredContent + $aliases
     Set-Content -Path $PROFILE -Value $newContent
 
-    Write-Host "[OK] Added aliases to PowerShell profile: $PROFILE"
+    Write-Host "OK: Added aliases to PowerShell profile: $PROFILE"
 }
 
 # Create the GLM-4.6 wrapper
@@ -248,13 +248,13 @@ if (-not (Test-Path `$env:CLAUDE_HOME)) {
 Set-Content -Path (Join-Path `$env:CLAUDE_HOME "settings.json") -Value `$settingsContent
 
 # Launch Claude Code with custom config
-Write-Host "[LAUNCH] Starting Claude Code with GLM-4.6 (Standard Model)..."
-Write-Host "[CONFIG] Config directory: `$env:CLAUDE_HOME"
+Write-Host "LAUNCH: Starting Claude Code with GLM-4.6 (Standard Model)..."
+Write-Host "CONFIG: Config directory: `$env:CLAUDE_HOME"
 Write-Host ""
 
 # Check if claude exists
 if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-    Write-Host "[ERROR] 'claude' command not found!"
+    Write-Host "ERROR: 'claude' command not found!"
     Write-Host "Please ensure Claude Code is installed and in your PATH"
     exit 1
 }
@@ -264,7 +264,7 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
 "@
 
     Set-Content -Path $wrapperPath -Value $wrapperContent
-    Write-Host "[OK] Installed claude-glm at $wrapperPath" -ForegroundColor Green
+    Write-Host "OK: Installed claude-glm at $wrapperPath" -ForegroundColor Green
 }
 
 # Create the GLM-4.5 wrapper
@@ -303,13 +303,13 @@ if (-not (Test-Path `$env:CLAUDE_HOME)) {
 Set-Content -Path (Join-Path `$env:CLAUDE_HOME "settings.json") -Value `$settingsContent
 
 # Launch Claude Code with custom config
-Write-Host "[LAUNCH] Starting Claude Code with GLM-4.5..."
-Write-Host "[CONFIG] Config directory: `$env:CLAUDE_HOME"
+Write-Host "LAUNCH: Starting Claude Code with GLM-4.5..."
+Write-Host "CONFIG: Config directory: `$env:CLAUDE_HOME"
 Write-Host ""
 
 # Check if claude exists
 if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-    Write-Host "[ERROR] 'claude' command not found!"
+    Write-Host "ERROR: 'claude' command not found!"
     Write-Host "Please ensure Claude Code is installed and in your PATH"
     exit 1
 }
@@ -319,7 +319,7 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
 "@
 
     Set-Content -Path $wrapperPath -Value $wrapperContent
-    Write-Host "[OK] Installed claude-glm-4.5 at $wrapperPath" -ForegroundColor Green
+    Write-Host "OK: Installed claude-glm-4.5 at $wrapperPath" -ForegroundColor Green
 }
 
 # Create the fast GLM-4.5-Air wrapper
@@ -358,13 +358,13 @@ if (-not (Test-Path `$env:CLAUDE_HOME)) {
 Set-Content -Path (Join-Path `$env:CLAUDE_HOME "settings.json") -Value `$settingsContent
 
 # Launch Claude Code with custom config
-Write-Host "[FAST] Starting Claude Code with GLM-4.5-Air (Fast Model)..."
-Write-Host "[CONFIG] Config directory: `$env:CLAUDE_HOME"
+Write-Host "FAST: Starting Claude Code with GLM-4.5-Air (Fast Model)..."
+Write-Host "CONFIG: Config directory: `$env:CLAUDE_HOME"
 Write-Host ""
 
 # Check if claude exists
 if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-    Write-Host "[ERROR] 'claude' command not found!"
+    Write-Host "ERROR: 'claude' command not found!"
     Write-Host "Please ensure Claude Code is installed and in your PATH"
     exit 1
 }
@@ -374,19 +374,19 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
 "@
 
     Set-Content -Path $wrapperPath -Value $wrapperContent
-    Write-Host "[OK] Installed claude-glm-fast at $wrapperPath" -ForegroundColor Green
+    Write-Host "OK: Installed claude-glm-fast at $wrapperPath" -ForegroundColor Green
 }
 
 # Check Claude Code availability
 function Test-ClaudeInstallation {
-    Write-Host "[CHECKING] Claude Code installation..."
+    Write-Host "CHECKING: Claude Code installation..."
 
     if (Get-Command claude -ErrorAction SilentlyContinue) {
         $claudePath = (Get-Command claude).Source
-        Write-Host "[OK] Claude Code found at: $claudePath"
+        Write-Host "OK: Claude Code found at: $claudePath"
         return $true
     } else {
-        Write-Host "[WARNING] Claude Code not found in PATH"
+        Write-Host "WARNING: Claude Code not found in PATH"
         Write-Host ""
         Write-Host "Options:"
         Write-Host "1. If Claude Code is installed elsewhere, add it to PATH first"
@@ -411,7 +411,7 @@ function Report-Error {
     )
 
     Write-Host ""
-    Write-Host "[ERROR] Installation failed!" -ForegroundColor Red
+    Write-Host "ERROR: Installation failed!" -ForegroundColor Red
     Write-Host ""
 
     # Collect system information
@@ -489,7 +489,7 @@ function Report-Error {
 
     $issueUrl = "https://github.com/JoeInnsp23/claude-glm-wrapper/issues/new?title=$encodedTitle`&body=$encodedBody`&labels=bug,windows,installation"
 
-    Write-Host "[INFO] Error details have been prepared for reporting."
+    Write-Host "INFO: Error details have been prepared for reporting."
     Write-Host ""
 
     # Try multiple methods to open the browser
@@ -499,7 +499,7 @@ function Report-Error {
     try {
         Start-Process $issueUrl -ErrorAction Stop
         $browserOpened = $true
-        Write-Host "[OK] Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+        Write-Host "OK: Browser opened. Please submit the GitHub issue." -ForegroundColor Green
     } catch {
         Write-DebugLog "Start-Process failed: $_"
     }
@@ -510,7 +510,7 @@ function Report-Error {
             & cmd /c start $issueUrl 2>$null
             if ($LASTEXITCODE -eq 0) {
                 $browserOpened = $true
-                Write-Host "[OK] Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+                Write-Host "OK: Browser opened. Please submit the GitHub issue." -ForegroundColor Green
             }
         } catch {
             Write-DebugLog "cmd /c start failed: $_"
@@ -522,14 +522,14 @@ function Report-Error {
         try {
             & explorer.exe $issueUrl
             $browserOpened = $true
-            Write-Host "[OK] Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+            Write-Host "OK: Browser opened. Please submit the GitHub issue." -ForegroundColor Green
         } catch {
             Write-DebugLog "explorer.exe failed: $_"
         }
     }
 
     if (-not $browserOpened) {
-        Write-Host "[WARNING] Could not open browser automatically." -ForegroundColor Yellow
+        Write-Host "WARNING: Could not open browser automatically." -ForegroundColor Yellow
         Write-Host ""
         Write-Host "Please copy and open this URL manually:" -ForegroundColor Yellow
         Write-Host $issueUrl -ForegroundColor Cyan
@@ -548,7 +548,7 @@ function Report-Error {
 
 # Main installation
 function Install-ClaudeGlm {
-    Write-Host "[INSTALLER] Claude-GLM PowerShell Installer for Windows"
+    Write-Host "INSTALLER: Claude-GLM PowerShell Installer for Windows"
     Write-Host "==============================================="
     Write-Host ""
     Write-Host "This installer:"
@@ -558,7 +558,7 @@ function Install-ClaudeGlm {
     Write-Host ""
 
     if ($Debug) {
-        Write-Host "[DEBUG] Debug mode enabled" -ForegroundColor Gray
+        Write-Host "DEBUG: Debug mode enabled" -ForegroundColor Gray
         Write-Host ""
     }
 
@@ -582,7 +582,7 @@ function Install-ClaudeGlm {
 
     if ((Test-Path $glmWrapper) -or (Test-Path $glmFastWrapper)) {
         Write-Host ""
-        Write-Host "[OK] Existing installation detected!"
+        Write-Host "OK: Existing installation detected!"
         Write-Host "1. Update API key only"
         Write-Host "2. Reinstall everything"
         Write-Host "3. Cancel"
@@ -596,7 +596,7 @@ function Install-ClaudeGlm {
                     New-ClaudeGlmWrapper
                     New-ClaudeGlm45Wrapper
                     New-ClaudeGlmFastWrapper
-                    Write-Host "[OK] API key updated!"
+                    Write-Host "OK: API key updated!"
                     exit 0
                 }
             }
@@ -616,9 +616,9 @@ function Install-ClaudeGlm {
 
     if ($inputKey) {
         $script:ZaiApiKey = $inputKey
-        Write-Host "[OK] API key received ($($inputKey.Length) characters)"
+        Write-Host "OK: API key received ($($inputKey.Length) characters)"
     } else {
-        Write-Host "[WARNING] No API key provided. Add it manually later to:"
+        Write-Host "WARNING: No API key provided. Add it manually later to:"
         Write-Host "   $UserBinDir\claude-glm.ps1"
         Write-Host "   $UserBinDir\claude-glm-4.5.ps1"
         Write-Host "   $UserBinDir\claude-glm-fast.ps1"
@@ -632,17 +632,17 @@ function Install-ClaudeGlm {
 
     # Final instructions
     Write-Host ""
-    Write-Host "[OK] Installation complete!"
+    Write-Host "OK: Installation complete!"
     Write-Host ""
     Write-Host "=========================================="
-    Write-Host "[IMPORTANT] Restart PowerShell or reload profile:"
+    Write-Host "IMPORTANT: Restart PowerShell or reload profile:"
     Write-Host "=========================================="
     Write-Host ""
     Write-Host "   . `$PROFILE"
     Write-Host ""
     Write-Host "=========================================="
     Write-Host ""
-    Write-Host "[INFO] After reloading, you can use:"
+    Write-Host "INFO: After reloading, you can use:"
     Write-Host ""
     Write-Host "Commands:"
     Write-Host "   claude-glm      - GLM-4.6 (latest)"
@@ -657,20 +657,20 @@ function Install-ClaudeGlm {
     Write-Host ""
 
     if ($ZaiApiKey -eq "YOUR_ZAI_API_KEY_HERE") {
-        Write-Host "[WARNING] Don't forget to add your API key to:"
+        Write-Host "WARNING: Don't forget to add your API key to:"
         Write-Host "   $UserBinDir\claude-glm.ps1"
         Write-Host "   $UserBinDir\claude-glm-4.5.ps1"
         Write-Host "   $UserBinDir\claude-glm-fast.ps1"
     }
 
     Write-Host ""
-    Write-Host "[LOCATION] Installation location: $UserBinDir"
-    Write-Host "[LOCATION] Config directories: $GlmConfigDir, $Glm45ConfigDir, $GlmFastConfigDir"
+    Write-Host "LOCATION: Installation location: $UserBinDir"
+    Write-Host "LOCATION: Config directories: $GlmConfigDir, $Glm45ConfigDir, $GlmFastConfigDir"
 }
 
 # Test error functionality if requested
 if ($TestError) {
-    Write-Host "[TEST] Testing error reporting functionality..." -ForegroundColor Magenta
+    Write-Host "TEST: Testing error reporting functionality..." -ForegroundColor Magenta
     Write-Host ""
 
     # Show how script was invoked
@@ -690,7 +690,7 @@ if ($TestError) {
         Report-Error -ErrorMessage $testErrorMessage -ErrorLine $testErrorLine -ErrorRecord $_
     }
 
-    Write-Host "[OK] Test complete. If a browser window opened, error reporting is working!" -ForegroundColor Green
+    Write-Host "OK: Test complete. If a browser window opened, error reporting is working!" -ForegroundColor Green
     Write-Host ""
     Write-Host "To run normal installation, use:" -ForegroundColor Gray
     Write-Host "   iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.ps1 | iex" -ForegroundColor Cyan
