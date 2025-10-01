@@ -551,7 +551,7 @@ function Report-Error {
     }
 
     Write-Host ""
-    Write-Host "Press Enter to close this window..." -ForegroundColor Gray
+    Write-Host "Press Enter to continue..." -ForegroundColor Gray
     $null = Read-Host
 }
 
@@ -704,6 +704,9 @@ if ($TestError) {
     Write-Host ""
     Write-Host "To run normal installation, use:" -ForegroundColor Gray
     Write-Host "   iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.ps1 | iex" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Press Enter to close this window..." -ForegroundColor Gray
+    $null = Read-Host
     exit 0
 }
 
@@ -724,5 +727,11 @@ try {
 
     Write-DebugLog "Caught error: $errorMessage at $errorLine"
     Report-Error -ErrorMessage $errorMessage -ErrorLine $errorLine -ErrorRecord $_
+
+    # Give user time to read any final messages before exiting
+    Write-Host ""
+    Write-Host "Installation terminated due to error." -ForegroundColor Red
+    Write-Host "Press Enter to close this window..." -ForegroundColor Gray
+    $null = Read-Host
     exit 1
 }
