@@ -705,9 +705,9 @@ if ($TestError) {
     Write-Host "To run normal installation, use:" -ForegroundColor Gray
     Write-Host "   iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.ps1 | iex" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "Press Enter to close this window..." -ForegroundColor Gray
+    Write-Host "Press Enter to finish (window will remain open)..." -ForegroundColor Gray
     $null = Read-Host
-    exit 0
+    # Script ends naturally here - PowerShell window stays open
 }
 
 # Run installation with error handling
