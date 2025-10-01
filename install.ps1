@@ -180,7 +180,8 @@ function Add-PowerShellAliases {
     if (Test-Path $PROFILE) {
         try {
             $profileContent = Get-Content $PROFILE -ErrorAction Stop
-            Write-DebugLog "Read existing profile with $($profileContent.Count) lines"
+            $lineCount = $profileContent.Count
+            Write-DebugLog "Read existing profile with $lineCount lines"
         } catch {
             Write-DebugLog "Could not read profile: $_"
             $profileContent = @()
@@ -364,7 +365,7 @@ function Test-ClaudeInstallation {
         Write-Host "Options:"
         Write-Host "1. If Claude Code is installed elsewhere, add it to PATH first"
         Write-Host "2. Install Claude Code from: https://www.anthropic.com/claude-code"
-        Write-Host "3. Continue anyway (wrappers will be created but won't work until claude is available)"
+        Write-Host "3. Continue anyway (wrappers will be created but will not work until claude is available)"
         Write-Host ""
         $continue = Read-Host "Continue with installation? (y/n)"
         if ($continue -ne "y" -and $continue -ne "Y") {
@@ -589,7 +590,8 @@ function Install-ClaudeGlm {
 
     if ($inputKey) {
         $script:ZaiApiKey = $inputKey
-        Write-Host "OK: API key received ($($inputKey.Length) characters)"
+        $keyLength = $inputKey.Length
+        Write-Host "OK: API key received ($keyLength characters)"
     } else {
         Write-Host "WARNING: No API key provided. Add it manually later to:"
         Write-Host "   $UserBinDir\claude-glm.ps1"
@@ -630,7 +632,7 @@ function Install-ClaudeGlm {
     Write-Host ""
 
     if ($ZaiApiKey -eq "YOUR_ZAI_API_KEY_HERE") {
-        Write-Host "WARNING: Don't forget to add your API key to:"
+        Write-Host "WARNING: Do not forget to add your API key to:"
         Write-Host "   $UserBinDir\claude-glm.ps1"
         Write-Host "   $UserBinDir\claude-glm-4.5.ps1"
         Write-Host "   $UserBinDir\claude-glm-fast.ps1"
@@ -678,7 +680,9 @@ try {
 } catch {
     $errorMessage = $_.Exception.Message
     $errorLine = if ($_.InvocationInfo.ScriptLineNumber) {
-        "Line $($_.InvocationInfo.ScriptLineNumber) in $($_.InvocationInfo.ScriptName)"
+        $lineNum = $_.InvocationInfo.ScriptLineNumber
+        $scriptName = $_.InvocationInfo.ScriptName
+        "Line $lineNum in $scriptName"
     } else {
         "Unknown location"
     }
