@@ -385,7 +385,9 @@ function Report-Error {
     )
 
     Write-Host ""
+    Write-Host "=============================================" -ForegroundColor Red
     Write-Host "ERROR: Installation failed!" -ForegroundColor Red
+    Write-Host "=============================================" -ForegroundColor Red
     Write-Host ""
 
     # Collect system information
@@ -403,6 +405,29 @@ function Report-Error {
     $sanitizedError = $ErrorMessage -replace 'ANTHROPIC_AUTH_TOKEN\s*=\s*\S+', 'ANTHROPIC_AUTH_TOKEN="[REDACTED]"'
     $sanitizedError = $sanitizedError -replace 'ZaiApiKey\s*=\s*\S+', 'ZaiApiKey="[REDACTED]"'
     $sanitizedError = $sanitizedError -replace '\$ZaiApiKey\s*=\s*"\S+"', '$ZaiApiKey="[REDACTED]"'
+
+    # Display error details to user
+    Write-Host "Error Details:" -ForegroundColor Yellow
+    Write-Host $sanitizedError -ForegroundColor White
+    if ($ErrorLine) {
+        Write-Host "Location: $ErrorLine" -ForegroundColor Gray
+    }
+    Write-Host ""
+
+    # Ask if user wants to report the error
+    Write-Host "Would you like to report this error to GitHub?" -ForegroundColor Cyan
+    Write-Host "This will open your browser with a pre-filled issue report." -ForegroundColor Gray
+    $reportChoice = Read-Host "Report error? (y/n)"
+    Write-Host ""
+
+    if ($reportChoice -ne "y" -and $reportChoice -ne "Y") {
+        Write-Host "Error not reported. You can get help at:" -ForegroundColor Yellow
+        Write-Host "  https://github.com/JoeInnsp23/claude-glm-wrapper/issues" -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "Press Enter to close..." -ForegroundColor Gray
+        $null = Read-Host
+        return
+    }
 
     # Get additional context
     $claudeFound = if (Get-Command claude -ErrorAction SilentlyContinue) { "Yes" } else { "No" }
@@ -473,7 +498,7 @@ function Report-Error {
     try {
         Start-Process $issueUrl -ErrorAction Stop
         $browserOpened = $true
-        Write-Host "OK: Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+        Write-Host "OK: Browser opened with pre-filled error report." -ForegroundColor Green
     } catch {
         Write-DebugLog "Start-Process failed: $_"
     }
@@ -484,7 +509,7 @@ function Report-Error {
             & cmd /c start $issueUrl 2>$null
             if ($LASTEXITCODE -eq 0) {
                 $browserOpened = $true
-                Write-Host "OK: Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+                Write-Host "OK: Browser opened with pre-filled error report." -ForegroundColor Green
             }
         } catch {
             Write-DebugLog "cmd /c start failed: $_"
@@ -496,7 +521,7 @@ function Report-Error {
         try {
             & explorer.exe $issueUrl
             $browserOpened = $true
-            Write-Host "OK: Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+            Write-Host "OK: Browser opened with pre-filled error report." -ForegroundColor Green
         } catch {
             Write-DebugLog "explorer.exe failed: $_"
         }
@@ -518,6 +543,16 @@ function Report-Error {
     }
 
     Write-Host ""
+
+    # Add instructions and wait for user
+    if ($browserOpened) {
+        Write-Host "Please review the error report in your browser and submit the issue." -ForegroundColor Cyan
+        Write-Host "After submitting (or if you choose not to), return here." -ForegroundColor Gray
+    }
+
+    Write-Host ""
+    Write-Host "Press Enter to close this window..." -ForegroundColor Gray
+    $null = Read-Host
 }
 
 # Main installation
