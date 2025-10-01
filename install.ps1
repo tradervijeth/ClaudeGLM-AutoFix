@@ -216,52 +216,43 @@ Set-Alias ccf claude-glm-fast
 function New-ClaudeGlmWrapper {
     $wrapperPath = Join-Path $UserBinDir "claude-glm.ps1"
 
-    $wrapperContent = @"
-# Claude-GLM - Claude Code with Z.AI GLM-4.6 (Standard Model)
-
-# Set Z.AI environment variables
-`$env:ANTHROPIC_BASE_URL = "https://api.z.ai/api/anthropic"
-`$env:ANTHROPIC_AUTH_TOKEN = "$ZaiApiKey"
-`$env:ANTHROPIC_MODEL = "glm-4.6"
-`$env:ANTHROPIC_SMALL_FAST_MODEL = "glm-4.5-air"
-
-# Use custom config directory to avoid conflicts
-`$env:CLAUDE_HOME = "$GlmConfigDir"
-
-# Create config directory if it doesn't exist
-if (-not (Test-Path `$env:CLAUDE_HOME)) {
-    New-Item -ItemType Directory -Path `$env:CLAUDE_HOME -Force | Out-Null
-}
-
-# Create/update settings file with GLM configuration
-`$settingsContent = @"
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "$ZaiApiKey",
-    "ANTHROPIC_MODEL": "glm-4.6",
-    "ANTHROPIC_SMALL_FAST_MODEL": "glm-4.5-air"
-  }
-}
-"@
-
-Set-Content -Path (Join-Path `$env:CLAUDE_HOME "settings.json") -Value `$settingsContent
-
-# Launch Claude Code with custom config
-Write-Host "LAUNCH: Starting Claude Code with GLM-4.6 (Standard Model)..."
-Write-Host "CONFIG: Config directory: `$env:CLAUDE_HOME"
-Write-Host ""
-
-# Check if claude exists
-if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-    Write-Host "ERROR: 'claude' command not found!"
-    Write-Host "Please ensure Claude Code is installed and in your PATH"
-    exit 1
-}
-
-# Run the actual claude command
-& claude `$args
-"@
+    # Build wrapper content using array and join to avoid nested here-strings
+    $wrapperContent = @(
+        '# Claude-GLM - Claude Code with Z.AI GLM-4.6 (Standard Model)',
+        '',
+        '# Set Z.AI environment variables',
+        '$env:ANTHROPIC_BASE_URL = "https://api.z.ai/api/anthropic"',
+        "`$env:ANTHROPIC_AUTH_TOKEN = `"$ZaiApiKey`"",
+        '$env:ANTHROPIC_MODEL = "glm-4.6"',
+        '$env:ANTHROPIC_SMALL_FAST_MODEL = "glm-4.5-air"',
+        '',
+        '# Use custom config directory to avoid conflicts',
+        "`$env:CLAUDE_HOME = `"$GlmConfigDir`"",
+        '',
+        '# Create config directory if it doesn''t exist',
+        'if (-not (Test-Path $env:CLAUDE_HOME)) {',
+        '    New-Item -ItemType Directory -Path $env:CLAUDE_HOME -Force | Out-Null',
+        '}',
+        '',
+        '# Create/update settings file with GLM configuration',
+        '$settingsJson = "{`"env`":{`"ANTHROPIC_BASE_URL`":`"https://api.z.ai/api/anthropic`",`"ANTHROPIC_AUTH_TOKEN`":`"' + $ZaiApiKey + '`",`"ANTHROPIC_MODEL`":`"glm-4.6`",`"ANTHROPIC_SMALL_FAST_MODEL`":`"glm-4.5-air`"}}"',
+        'Set-Content -Path (Join-Path $env:CLAUDE_HOME "settings.json") -Value $settingsJson',
+        '',
+        '# Launch Claude Code with custom config',
+        'Write-Host "LAUNCH: Starting Claude Code with GLM-4.6 (Standard Model)..."',
+        'Write-Host "CONFIG: Config directory: $env:CLAUDE_HOME"',
+        'Write-Host ""',
+        '',
+        '# Check if claude exists',
+        'if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {',
+        '    Write-Host "ERROR: ''claude'' command not found!"',
+        '    Write-Host "Please ensure Claude Code is installed and in your PATH"',
+        '    exit 1',
+        '}',
+        '',
+        '# Run the actual claude command',
+        '& claude $args'
+    ) -join "`n"
 
     Set-Content -Path $wrapperPath -Value $wrapperContent
     Write-Host "OK: Installed claude-glm at $wrapperPath" -ForegroundColor Green
@@ -271,52 +262,43 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
 function New-ClaudeGlm45Wrapper {
     $wrapperPath = Join-Path $UserBinDir "claude-glm-4.5.ps1"
 
-    $wrapperContent = @"
-# Claude-GLM-4.5 - Claude Code with Z.AI GLM-4.5
-
-# Set Z.AI environment variables
-`$env:ANTHROPIC_BASE_URL = "https://api.z.ai/api/anthropic"
-`$env:ANTHROPIC_AUTH_TOKEN = "$ZaiApiKey"
-`$env:ANTHROPIC_MODEL = "glm-4.5"
-`$env:ANTHROPIC_SMALL_FAST_MODEL = "glm-4.5-air"
-
-# Use custom config directory to avoid conflicts
-`$env:CLAUDE_HOME = "$Glm45ConfigDir"
-
-# Create config directory if it doesn't exist
-if (-not (Test-Path `$env:CLAUDE_HOME)) {
-    New-Item -ItemType Directory -Path `$env:CLAUDE_HOME -Force | Out-Null
-}
-
-# Create/update settings file with GLM configuration
-`$settingsContent = @"
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "$ZaiApiKey",
-    "ANTHROPIC_MODEL": "glm-4.5",
-    "ANTHROPIC_SMALL_FAST_MODEL": "glm-4.5-air"
-  }
-}
-"@
-
-Set-Content -Path (Join-Path `$env:CLAUDE_HOME "settings.json") -Value `$settingsContent
-
-# Launch Claude Code with custom config
-Write-Host "LAUNCH: Starting Claude Code with GLM-4.5..."
-Write-Host "CONFIG: Config directory: `$env:CLAUDE_HOME"
-Write-Host ""
-
-# Check if claude exists
-if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-    Write-Host "ERROR: 'claude' command not found!"
-    Write-Host "Please ensure Claude Code is installed and in your PATH"
-    exit 1
-}
-
-# Run the actual claude command
-& claude `$args
-"@
+    # Build wrapper content using array and join to avoid nested here-strings
+    $wrapperContent = @(
+        '# Claude-GLM-4.5 - Claude Code with Z.AI GLM-4.5',
+        '',
+        '# Set Z.AI environment variables',
+        '$env:ANTHROPIC_BASE_URL = "https://api.z.ai/api/anthropic"',
+        "`$env:ANTHROPIC_AUTH_TOKEN = `"$ZaiApiKey`"",
+        '$env:ANTHROPIC_MODEL = "glm-4.5"',
+        '$env:ANTHROPIC_SMALL_FAST_MODEL = "glm-4.5-air"',
+        '',
+        '# Use custom config directory to avoid conflicts',
+        "`$env:CLAUDE_HOME = `"$Glm45ConfigDir`"",
+        '',
+        '# Create config directory if it doesn''t exist',
+        'if (-not (Test-Path $env:CLAUDE_HOME)) {',
+        '    New-Item -ItemType Directory -Path $env:CLAUDE_HOME -Force | Out-Null',
+        '}',
+        '',
+        '# Create/update settings file with GLM configuration',
+        '$settingsJson = "{`"env`":{`"ANTHROPIC_BASE_URL`":`"https://api.z.ai/api/anthropic`",`"ANTHROPIC_AUTH_TOKEN`":`"' + $ZaiApiKey + '`",`"ANTHROPIC_MODEL`":`"glm-4.5`",`"ANTHROPIC_SMALL_FAST_MODEL`":`"glm-4.5-air`"}}"',
+        'Set-Content -Path (Join-Path $env:CLAUDE_HOME "settings.json") -Value $settingsJson',
+        '',
+        '# Launch Claude Code with custom config',
+        'Write-Host "LAUNCH: Starting Claude Code with GLM-4.5..."',
+        'Write-Host "CONFIG: Config directory: $env:CLAUDE_HOME"',
+        'Write-Host ""',
+        '',
+        '# Check if claude exists',
+        'if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {',
+        '    Write-Host "ERROR: ''claude'' command not found!"',
+        '    Write-Host "Please ensure Claude Code is installed and in your PATH"',
+        '    exit 1',
+        '}',
+        '',
+        '# Run the actual claude command',
+        '& claude $args'
+    ) -join "`n"
 
     Set-Content -Path $wrapperPath -Value $wrapperContent
     Write-Host "OK: Installed claude-glm-4.5 at $wrapperPath" -ForegroundColor Green
@@ -326,52 +308,43 @@ if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
 function New-ClaudeGlmFastWrapper {
     $wrapperPath = Join-Path $UserBinDir "claude-glm-fast.ps1"
 
-    $wrapperContent = @"
-# Claude-GLM-Fast - Claude Code with Z.AI GLM-4.5-Air (Fast Model)
-
-# Set Z.AI environment variables
-`$env:ANTHROPIC_BASE_URL = "https://api.z.ai/api/anthropic"
-`$env:ANTHROPIC_AUTH_TOKEN = "$ZaiApiKey"
-`$env:ANTHROPIC_MODEL = "glm-4.5-air"
-`$env:ANTHROPIC_SMALL_FAST_MODEL = "glm-4.5-air"
-
-# Use custom config directory to avoid conflicts
-`$env:CLAUDE_HOME = "$GlmFastConfigDir"
-
-# Create config directory if it doesn't exist
-if (-not (Test-Path `$env:CLAUDE_HOME)) {
-    New-Item -ItemType Directory -Path `$env:CLAUDE_HOME -Force | Out-Null
-}
-
-# Create/update settings file with GLM-Air configuration
-`$settingsContent = @"
-{
-  "env": {
-    "ANTHROPIC_BASE_URL": "https://api.z.ai/api/anthropic",
-    "ANTHROPIC_AUTH_TOKEN": "$ZaiApiKey",
-    "ANTHROPIC_MODEL": "glm-4.5-air",
-    "ANTHROPIC_SMALL_FAST_MODEL": "glm-4.5-air"
-  }
-}
-"@
-
-Set-Content -Path (Join-Path `$env:CLAUDE_HOME "settings.json") -Value `$settingsContent
-
-# Launch Claude Code with custom config
-Write-Host "FAST: Starting Claude Code with GLM-4.5-Air (Fast Model)..."
-Write-Host "CONFIG: Config directory: `$env:CLAUDE_HOME"
-Write-Host ""
-
-# Check if claude exists
-if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-    Write-Host "ERROR: 'claude' command not found!"
-    Write-Host "Please ensure Claude Code is installed and in your PATH"
-    exit 1
-}
-
-# Run the actual claude command
-& claude `$args
-"@
+    # Build wrapper content using array and join to avoid nested here-strings
+    $wrapperContent = @(
+        '# Claude-GLM-Fast - Claude Code with Z.AI GLM-4.5-Air (Fast Model)',
+        '',
+        '# Set Z.AI environment variables',
+        '$env:ANTHROPIC_BASE_URL = "https://api.z.ai/api/anthropic"',
+        "`$env:ANTHROPIC_AUTH_TOKEN = `"$ZaiApiKey`"",
+        '$env:ANTHROPIC_MODEL = "glm-4.5-air"',
+        '$env:ANTHROPIC_SMALL_FAST_MODEL = "glm-4.5-air"',
+        '',
+        '# Use custom config directory to avoid conflicts',
+        "`$env:CLAUDE_HOME = `"$GlmFastConfigDir`"",
+        '',
+        '# Create config directory if it doesn''t exist',
+        'if (-not (Test-Path $env:CLAUDE_HOME)) {',
+        '    New-Item -ItemType Directory -Path $env:CLAUDE_HOME -Force | Out-Null',
+        '}',
+        '',
+        '# Create/update settings file with GLM-Air configuration',
+        '$settingsJson = "{`"env`":{`"ANTHROPIC_BASE_URL`":`"https://api.z.ai/api/anthropic`",`"ANTHROPIC_AUTH_TOKEN`":`"' + $ZaiApiKey + '`",`"ANTHROPIC_MODEL`":`"glm-4.5-air`",`"ANTHROPIC_SMALL_FAST_MODEL`":`"glm-4.5-air`"}}"',
+        'Set-Content -Path (Join-Path $env:CLAUDE_HOME "settings.json") -Value $settingsJson',
+        '',
+        '# Launch Claude Code with custom config',
+        'Write-Host "FAST: Starting Claude Code with GLM-4.5-Air (Fast Model)..."',
+        'Write-Host "CONFIG: Config directory: $env:CLAUDE_HOME"',
+        'Write-Host ""',
+        '',
+        '# Check if claude exists',
+        'if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {',
+        '    Write-Host "ERROR: ''claude'' command not found!"',
+        '    Write-Host "Please ensure Claude Code is installed and in your PATH"',
+        '    exit 1',
+        '}',
+        '',
+        '# Run the actual claude command',
+        '& claude $args'
+    ) -join "`n"
 
     Set-Content -Path $wrapperPath -Value $wrapperContent
     Write-Host "OK: Installed claude-glm-fast at $wrapperPath" -ForegroundColor Green
@@ -428,7 +401,7 @@ function Report-Error {
     # Sanitize error message (remove API keys)
     $sanitizedError = $ErrorMessage -replace 'ANTHROPIC_AUTH_TOKEN\s*=\s*\S+', 'ANTHROPIC_AUTH_TOKEN="[REDACTED]"'
     $sanitizedError = $sanitizedError -replace 'ZaiApiKey\s*=\s*\S+', 'ZaiApiKey="[REDACTED]"'
-    $sanitizedError = $sanitizedError -replace '\$ZaiApiKey\s*=\s*"[^"]+"', '$ZaiApiKey="[REDACTED]"'
+    $sanitizedError = $sanitizedError -replace '\$ZaiApiKey\s*=\s*"\S+"', '$ZaiApiKey="[REDACTED]"'
 
     # Get additional context
     $claudeFound = if (Get-Command claude -ErrorAction SilentlyContinue) { "Yes" } else { "No" }
