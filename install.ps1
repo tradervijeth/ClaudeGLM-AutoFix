@@ -8,6 +8,95 @@ $Glm45ConfigDir = "$env:USERPROFILE\.claude-glm-45"
 $GlmFastConfigDir = "$env:USERPROFILE\.claude-glm-fast"
 $ZaiApiKey = "YOUR_ZAI_API_KEY_HERE"
 
+# Find all existing wrapper installations
+function Find-AllInstallations {
+    $locations = @(
+        "$env:USERPROFILE\.local\bin",
+        "$env:ProgramFiles\Claude-GLM",
+        "$env:LOCALAPPDATA\Programs\claude-glm",
+        "C:\Program Files\Claude-GLM"
+    )
+
+    $foundFiles = @()
+
+    foreach ($location in $locations) {
+        if (Test-Path $location) {
+            # Find all claude-glm*.ps1 files in this location
+            $files = Get-ChildItem -Path $location -Filter "claude-glm*.ps1" -ErrorAction SilentlyContinue
+            foreach ($file in $files) {
+                $foundFiles += $file.FullName
+            }
+        }
+    }
+
+    return $foundFiles
+}
+
+# Clean up old wrapper installations
+function Remove-OldWrappers {
+    $currentLocation = $UserBinDir
+    $allWrappers = Find-AllInstallations
+
+    if ($allWrappers.Count -eq 0) {
+        return
+    }
+
+    # Separate current location files from old ones
+    $oldWrappers = @()
+    $currentWrappers = @()
+
+    foreach ($wrapper in $allWrappers) {
+        if ($wrapper -like "$currentLocation*") {
+            $currentWrappers += $wrapper
+        } else {
+            $oldWrappers += $wrapper
+        }
+    }
+
+    # If no old wrappers found, nothing to clean
+    if ($oldWrappers.Count -eq 0) {
+        return
+    }
+
+    Write-Host ""
+    Write-Host "🔍 Found existing wrappers in multiple locations:"
+    Write-Host ""
+
+    foreach ($wrapper in $oldWrappers) {
+        Write-Host "  ❌ $wrapper (old location)"
+    }
+
+    if ($currentWrappers.Count -gt 0) {
+        foreach ($wrapper in $currentWrappers) {
+            Write-Host "  ✅ $wrapper (current location)"
+        }
+    }
+
+    Write-Host ""
+    $cleanupChoice = Read-Host "Would you like to clean up old installations? (y/n)"
+
+    if ($cleanupChoice -eq "y" -or $cleanupChoice -eq "Y") {
+        Write-Host ""
+        Write-Host "Removing old wrappers..."
+        foreach ($wrapper in $oldWrappers) {
+            try {
+                Remove-Item -Path $wrapper -Force -ErrorAction Stop
+                Write-Host "  ✅ Removed: $wrapper"
+            } catch {
+                Write-Host "  ⚠️  Could not remove: $wrapper (permission denied)"
+            }
+        }
+        Write-Host ""
+        Write-Host "✅ Cleanup complete!"
+    } else {
+        Write-Host ""
+        Write-Host "⚠️  Skipping cleanup. Old wrappers may interfere with the new installation."
+        Write-Host "   You may want to manually remove them later."
+    }
+
+    Write-Host ""
+}
+
 # Setup user bin directory and add to PATH
 function Setup-UserBin {
     # Create user bin directory
@@ -279,6 +368,9 @@ function Install-ClaudeGlm {
 
     # Setup user bin directory
     Setup-UserBin
+
+    # Clean up old installations from different locations
+    Remove-OldWrappers
 
     # Check if already installed
     $glmWrapper = Join-Path $UserBinDir "claude-glm.ps1"

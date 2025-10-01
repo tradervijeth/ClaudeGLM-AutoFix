@@ -9,6 +9,96 @@ GLM_45_CONFIG_DIR="$HOME/.claude-glm-45"
 GLM_FAST_CONFIG_DIR="$HOME/.claude-glm-fast"
 ZAI_API_KEY="YOUR_ZAI_API_KEY_HERE"
 
+# Find all existing wrapper installations
+find_all_installations() {
+    local locations=(
+        "/usr/local/bin"
+        "/usr/bin"
+        "$HOME/.local/bin"
+        "$HOME/bin"
+    )
+
+    local found_files=()
+
+    for location in "${locations[@]}"; do
+        if [ -d "$location" ]; then
+            # Find all claude-glm* files in this location
+            while IFS= read -r file; do
+                if [ -f "$file" ]; then
+                    found_files+=("$file")
+                fi
+            done < <(find "$location" -maxdepth 1 -name "claude-glm*" 2>/dev/null)
+        fi
+    done
+
+    # Return found files (print them)
+    printf '%s\n' "${found_files[@]}"
+}
+
+# Clean up old wrapper installations
+cleanup_old_wrappers() {
+    local current_location="$USER_BIN_DIR"
+    local all_wrappers=($(find_all_installations))
+
+    if [ ${#all_wrappers[@]} -eq 0 ]; then
+        return 0
+    fi
+
+    # Separate current location files from old ones
+    local old_wrappers=()
+    local current_wrappers=()
+
+    for wrapper in "${all_wrappers[@]}"; do
+        if [[ "$wrapper" == "$current_location"* ]]; then
+            current_wrappers+=("$wrapper")
+        else
+            old_wrappers+=("$wrapper")
+        fi
+    done
+
+    # If no old wrappers found, nothing to clean
+    if [ ${#old_wrappers[@]} -eq 0 ]; then
+        return 0
+    fi
+
+    echo ""
+    echo "🔍 Found existing wrappers in multiple locations:"
+    echo ""
+
+    for wrapper in "${old_wrappers[@]}"; do
+        echo "  ❌ $wrapper (old location)"
+    done
+
+    if [ ${#current_wrappers[@]} -gt 0 ]; then
+        for wrapper in "${current_wrappers[@]}"; do
+            echo "  ✅ $wrapper (current location)"
+        done
+    fi
+
+    echo ""
+    read -p "Would you like to clean up old installations? (y/n): " cleanup_choice
+
+    if [[ "$cleanup_choice" == "y" || "$cleanup_choice" == "Y" ]]; then
+        echo ""
+        echo "Removing old wrappers..."
+        for wrapper in "${old_wrappers[@]}"; do
+            if rm "$wrapper" 2>/dev/null; then
+                echo "  ✅ Removed: $wrapper"
+            else
+                echo "  ⚠️  Could not remove: $wrapper (permission denied)"
+            fi
+        done
+        echo ""
+        echo "✅ Cleanup complete!"
+    else
+        echo ""
+        echo "⚠️  Skipping cleanup. Old wrappers may interfere with the new installation."
+        echo "   You may want to manually remove them later."
+    fi
+
+    echo ""
+}
+
 # Detect shell and rc file
 detect_shell_rc() {
     local shell_name=$(basename "$SHELL")
@@ -337,7 +427,10 @@ main() {
     
     # Setup user bin directory
     setup_user_bin
-    
+
+    # Clean up old installations from different locations
+    cleanup_old_wrappers
+
     # Check if already installed
     if [ -f "$USER_BIN_DIR/claude-glm" ] || [ -f "$USER_BIN_DIR/claude-glm-fast" ]; then
         echo ""
