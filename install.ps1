@@ -707,7 +707,8 @@ if ($TestError) {
     Write-Host ""
     Write-Host "Press Enter to finish (window will remain open)..." -ForegroundColor Gray
     $null = Read-Host
-    # Script ends naturally here - PowerShell window stays open
+    # Return to stop script execution without closing window
+    return
 }
 
 # Run installation with error handling
@@ -728,10 +729,11 @@ try {
     Write-DebugLog "Caught error: $errorMessage at $errorLine"
     Report-Error -ErrorMessage $errorMessage -ErrorLine $errorLine -ErrorRecord $_
 
-    # Give user time to read any final messages before exiting
+    # Give user time to read any final messages before stopping
     Write-Host ""
     Write-Host "Installation terminated due to error." -ForegroundColor Red
-    Write-Host "Press Enter to close this window..." -ForegroundColor Gray
+    Write-Host "Press Enter to finish (window will remain open)..." -ForegroundColor Gray
     $null = Read-Host
-    exit 1
+    # Return to stop script execution without closing window
+    return
 }
