@@ -2,30 +2,39 @@
 
 Use [Z.AI's GLM models](https://z.ai) with [Claude Code](https://www.anthropic.com/claude-code) — **without losing your existing Claude setup!**
 
-Switch freely between GLM-4.5, GLM-4.5-Air, and original Anthropic Claude models using simple commands.
+Switch freely between GLM-4.6, GLM-4.5, GLM-4.5-Air, and original Anthropic Claude models using simple commands.
 
 ## Why This Wrapper?
 
 **💰 Cost-effective**: Z.AI's GLM models offer competitive pricing (often with free tiers)
 **🔄 Risk-free**: Your existing Claude Code setup remains completely untouched
-**⚡ Multiple options**: Choose between standard (GLM-4.5) and fast (GLM-4.5-Air) models
+**⚡ Multiple options**: Choose between GLM-4.6 (latest), GLM-4.5, and GLM-4.5-Air (fast)
 **🎯 Perfect for**: Development, testing, or when you want to conserve your Claude API credits
 
 ## Quick Start
 
+### One-Line Install (Recommended)
 ```bash
-# 1. Clone and install
-git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
-cd claude-glm-wrapper
-bash install.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
+```
 
-# 2. Source your shell config (the installer will tell you the exact command)
+Then source your shell config:
+```bash
 source ~/.zshrc  # or ~/.bashrc
+```
 
-# 3. Start using GLM models!
-ccg              # Start Claude Code with GLM-4.5
-ccf              # Start Claude Code with GLM-4.5-Air (faster)
-cca              # Switch back to regular Claude
+### Alternative: Clone and Install
+```bash
+git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
+cd claude-glm-wrapper && bash install.sh && source ~/.zshrc
+```
+
+### Start Using GLM Models
+```bash
+ccg              # Claude Code with GLM-4.6 (latest)
+ccg45            # Claude Code with GLM-4.5
+ccf              # Claude Code with GLM-4.5-Air (faster)
+cc               # Regular Claude Code
 ```
 
 That's it! 🎉
@@ -33,7 +42,7 @@ That's it! 🎉
 ## Features
 
 - 🚀 **Easy switching** between GLM and Claude models
-- ⚡ **Two GLM models**: Standard (GLM-4.5) and Fast (GLM-4.5-Air)
+- ⚡ **Multiple GLM models**: GLM-4.6 (latest), GLM-4.5, and GLM-4.5-Air (fast)
 - 🔒 **No sudo required**: Installs to user's home directory
 - 🖥️ **Server-friendly**: Works on Unix/Linux servers
 - 📁 **Isolated configs**: Each model uses its own config directory — no conflicts!
@@ -46,15 +55,10 @@ That's it! 🎉
 
 ## Installation
 
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
-cd claude-glm-wrapper
-```
+### Method 1: One-Line Install (Recommended)
 
-### Step 2: Run the Installer
 ```bash
-bash install.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
 ```
 
 The installer will:
@@ -63,13 +67,28 @@ The installer will:
 - Create wrapper commands in `~/.local/bin`
 - Add convenient aliases to your shell
 
-### Step 3: Activate (IMPORTANT!)
-After installation completes, run the command the installer shows you:
+After installation, **activate the changes** (IMPORTANT!):
 ```bash
 source ~/.zshrc  # or ~/.bashrc, depending on your shell
 ```
 
-**⚠️ Don't skip this step!** Without sourcing, the commands won't be available in your current terminal.
+**⚠️ Don't skip the source step!** Without sourcing, the commands won't be available in your current terminal.
+
+### Method 2: Clone and Install
+
+If you prefer to review the code first:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
+cd claude-glm-wrapper
+
+# 2. Run the installer
+bash install.sh
+
+# 3. Activate
+source ~/.zshrc  # or ~/.bashrc
+```
 
 ## Usage
 
@@ -79,25 +98,31 @@ The installer creates these commands and aliases:
 
 | Alias | Full Command | What It Does | When to Use |
 |-------|--------------|--------------|-------------|
-| `cc` | `claude` | Regular Claude Code | Default - use your normal Claude |
-| `ccg` | `claude-glm` | GLM-4.5 (standard) | Best quality GLM model |
+| `cc` | `claude` | Regular Claude Code | Default - your normal Claude setup |
+| `ccg` | `claude-glm` | GLM-4.6 (latest) | Best quality GLM model |
+| `ccg45` | `claude-glm-4.5` | GLM-4.5 | Previous version of GLM |
 | `ccf` | `claude-glm-fast` | GLM-4.5-Air (fast) | Quicker responses, lower cost |
-| `cca` | `claude-anthropic` | Original Claude | Switch back to Anthropic Claude |
 
 **💡 Tip**: Use the short aliases! They're faster to type and easier to remember.
 
 ### How It Works
 
 Each command starts a **separate Claude Code session** with different configurations:
-- `ccg` and `ccf` use Z.AI's API with your Z.AI key
-- `cca` uses Anthropic's API with your Anthropic key
+- `ccg`, `ccg45`, and `ccf` use Z.AI's API with your Z.AI key
+- `cc` uses Anthropic's API with your Anthropic key (default Claude setup)
 - Your configurations **never conflict** — they're stored in separate directories
 
 ### Basic Examples
 
-**Start a coding session with GLM:**
+**Start a coding session with the latest GLM:**
 ```bash
 ccg
+# Opens Claude Code using GLM-4.6
+```
+
+**Use GLM-4.5:**
+```bash
+ccg45
 # Opens Claude Code using GLM-4.5
 ```
 
@@ -107,10 +132,10 @@ ccf
 # Opens Claude Code using GLM-4.5-Air
 ```
 
-**Switch back to regular Claude:**
+**Use regular Claude:**
 ```bash
-cca
-# Opens Claude Code with Anthropic models
+cc
+# Opens Claude Code with Anthropic models (your default setup)
 ```
 
 **Pass arguments like normal:**
@@ -124,13 +149,13 @@ ccf "quick question about Python"
 
 ### Workflow 1: Testing with GLM, Production with Claude
 ```bash
-# Develop and test with cost-effective GLM
+# Develop and test with cost-effective GLM-4.6
 ccg
 # ... work on your code ...
 # exit
 
 # Switch to Claude for final review
-cca
+cc
 # ... final review with Claude ...
 ```
 
@@ -139,7 +164,7 @@ cca
 # Quick syntax questions
 ccf "how do I use async/await in Python?"
 
-# Complex refactoring with standard model
+# Complex refactoring with latest GLM
 ccg
 # ... longer coding session ...
 ```
@@ -152,7 +177,7 @@ ccg
 
 # Project 2: Use Claude for critical work
 cd ~/project2
-cca
+cc
 ```
 
 **Each session is independent** — your chat history stays separate!
@@ -165,9 +190,10 @@ Each wrapper uses its own configuration directory to prevent conflicts:
 
 | Command | Config Directory | Purpose |
 |---------|-----------------|---------|
-| `claude-glm` | `~/.claude-glm/` | GLM-4.5 settings and history |
+| `claude-glm` | `~/.claude-glm/` | GLM-4.6 settings and history |
+| `claude-glm-4.5` | `~/.claude-glm-45/` | GLM-4.5 settings and history |
 | `claude-glm-fast` | `~/.claude-glm-fast/` | GLM-4.5-Air settings and history |
-| `claude-anthropic` | `~/.claude/` (default) | Your original Claude setup |
+| `claude` | `~/.claude/` (default) | Your original Claude setup |
 
 **This means:**
 - ✅ Your original Claude settings are **never touched**
@@ -177,9 +203,9 @@ Each wrapper uses its own configuration directory to prevent conflicts:
 ### Wrapper Scripts Location
 
 The installer creates wrapper scripts in `~/.local/bin/`:
-- `~/.local/bin/claude-glm`
-- `~/.local/bin/claude-glm-fast`
-- `~/.local/bin/claude-anthropic`
+- `~/.local/bin/claude-glm` (GLM-4.6)
+- `~/.local/bin/claude-glm-4.5` (GLM-4.5)
+- `~/.local/bin/claude-glm-fast` (GLM-4.5-Air)
 
 These are just tiny bash scripts that set the right environment variables before launching Claude Code.
 
@@ -187,14 +213,19 @@ These are just tiny bash scripts that set the right environment variables before
 
 ### Option 1: Use the Installer (Easiest)
 ```bash
-cd claude-glm-wrapper
-bash install.sh
+# If you cloned the repo:
+cd claude-glm-wrapper && bash install.sh
+
+# Or use the one-liner again:
+bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
+
 # Choose option "1) Update API key only"
 ```
 
 ### Option 2: Edit Manually
 ```bash
 nano ~/.local/bin/claude-glm
+nano ~/.local/bin/claude-glm-4.5
 nano ~/.local/bin/claude-glm-fast
 # Find and replace ANTHROPIC_AUTH_TOKEN value
 ```
@@ -224,7 +255,7 @@ Claude Code reads these variables and uses them instead of the defaults. Simple!
 
 **Test it**: Run `which claude` — it should show a path.
 
-### ❌ "ccg: command not found" (or ccf, cca)
+### ❌ "ccg: command not found" (or ccg45, ccf, cc)
 
 **Problem**: You didn't source your shell config after installation.
 
@@ -250,7 +281,7 @@ source ~/.zshrc  # or ~/.bashrc
 
 **Solution**: Each command is independent. Make sure you:
 - Exit any running Claude Code session
-- Start fresh with the command you want (`ccg`, `ccf`, or `cca`)
+- Start fresh with the command you want (`ccg`, `ccg45`, `ccf`, or `cc`)
 
 ### 💡 General Tips
 
@@ -265,11 +296,12 @@ source ~/.zshrc  # or ~/.bashrc
 ```bash
 # Remove wrapper scripts
 rm ~/.local/bin/claude-glm
+rm ~/.local/bin/claude-glm-4.5
 rm ~/.local/bin/claude-glm-fast
-rm ~/.local/bin/claude-anthropic
 
 # Remove config directories (optional - deletes chat history)
 rm -rf ~/.claude-glm
+rm -rf ~/.claude-glm-45
 rm -rf ~/.claude-glm-fast
 ```
 
@@ -280,8 +312,8 @@ Edit your shell config file and remove these lines:
 # Claude Code Model Switcher Aliases
 alias cc='claude'
 alias ccg='claude-glm'
+alias ccg45='claude-glm-4.5'
 alias ccf='claude-glm-fast'
-alias cca='claude-anthropic'
 ```
 
 **Files to check**: `~/.zshrc` or `~/.bashrc`
@@ -294,12 +326,14 @@ After removing, run: `source ~/.zshrc` (or your shell's rc file)
 **A**: No! Your regular Claude Code setup is completely untouched. The wrappers use separate config directories.
 
 ### Q: Can I use both GLM and Claude in the same project?
-**A**: Yes! Just use `ccg` for GLM sessions and `cca` for Claude sessions. Each maintains its own chat history.
+**A**: Yes! Just use `ccg` for GLM sessions and `cc` for Claude sessions. Each maintains its own chat history.
 
-### Q: Which model should I use - standard or fast?
+### Q: Which model should I use?
 **A**:
-- Use **`ccg` (GLM-4.5)** for: Complex coding, refactoring, detailed explanations
+- Use **`ccg` (GLM-4.6)** for: Latest model, complex coding, refactoring, detailed explanations
+- Use **`ccg45` (GLM-4.5)** for: Previous version, if you need consistency with older projects
 - Use **`ccf` (GLM-4.5-Air)** for: Quick questions, simple tasks, faster responses
+- Use **`cc` (Claude)** for: Your regular Anthropic Claude setup
 
 ### Q: Is this secure?
 **A**: Yes! Your API keys are stored locally on your machine in plain bash scripts (just like Claude Code's default config). Keep your `~/.local/bin` directory permissions secure.
@@ -311,7 +345,7 @@ After removing, run: `source ~/.zshrc` (or your shell's rc file)
 **A**: Yes! Edit the wrapper scripts in `~/.local/bin/` and change the `ANTHROPIC_MODEL` variable to any model Z.AI supports.
 
 ### Q: What happens if I run out of Z.AI credits?
-**A**: The GLM commands will fail with an API error. Just switch to regular Claude using `cca` until you add more credits.
+**A**: The GLM commands will fail with an API error. Just switch to regular Claude using `cc` until you add more credits.
 
 ## Contributing
 
