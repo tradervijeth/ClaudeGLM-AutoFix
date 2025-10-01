@@ -1,0 +1,40 @@
+{
+  "name": "claude-glm-installer",
+  "version": "1.0.0",
+  "description": "Cross-platform installer for Claude Code with Z.AI GLM models",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "glm",
+    "z.ai",
+    "ai",
+    "llm",
+    "installer"
+  ],
+  "homepage": "https://github.com/JoeInnsp23/claude-glm-wrapper#readme",
+  "bugs": {
+    "url": "https://github.com/JoeInnsp23/claude-glm-wrapper/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JoeInnsp23/claude-glm-wrapper.git"
+  },
+  "license": "MIT",
+  "author": "Joseph Stephenson-Mouzo",
+  "bin": {
+    "claude-glm-installer": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "install.sh",
+    "install.ps1",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -13,23 +13,26 @@ Switch freely between GLM-4.6, GLM-4.5, GLM-4.5-Air, and original Anthropic Clau
 
 ## Quick Start
 
-### One-Line Install (Recommended)
+### Universal Installation (All Platforms)
+
+**One command works everywhere - Windows, macOS, and Linux:**
+
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
+npx claude-glm-installer
 ```
 
-Then source your shell config:
+Then activate (platform-specific):
 ```bash
+# macOS / Linux:
 source ~/.zshrc  # or ~/.bashrc
-```
 
-### Alternative: Clone and Install
-```bash
-git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
-cd claude-glm-wrapper && bash install.sh && source ~/.zshrc
+# Windows PowerShell:
+. $PROFILE
 ```
 
 ### Start Using GLM Models
+
+**All Platforms:**
 ```bash
 ccg              # Claude Code with GLM-4.6 (latest)
 ccg45            # Claude Code with GLM-4.5
@@ -39,56 +42,117 @@ cc               # Regular Claude Code
 
 That's it! 🎉
 
+---
+
+### Alternative: Platform-Specific Installers
+
+<details>
+<summary>Click to expand platform-specific installation methods</summary>
+
+#### macOS / Linux
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/powershell/install.sh)
+source ~/.zshrc  # or ~/.bashrc
+```
+
+#### Windows (PowerShell)
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/powershell/install.ps1 | iex
+. $PROFILE
+```
+
+</details>
+
 ## Features
 
 - 🚀 **Easy switching** between GLM and Claude models
 - ⚡ **Multiple GLM models**: GLM-4.6 (latest), GLM-4.5, and GLM-4.5-Air (fast)
-- 🔒 **No sudo required**: Installs to user's home directory
-- 🖥️ **Server-friendly**: Works on Unix/Linux servers
+- 🔒 **No sudo/admin required**: Installs to user's home directory
+- 🖥️ **Cross-platform**: Works on Windows, macOS, and Linux
 - 📁 **Isolated configs**: Each model uses its own config directory — no conflicts!
 - 🔧 **Shell aliases**: Quick access with simple commands
 
 ## Prerequisites
 
-1. **Claude Code**: Install from [anthropic.com/claude-code](https://www.anthropic.com/claude-code)
-2. **Z.AI API Key**: Get your free key from [z.ai/manage-apikey/apikey-list](https://z.ai/manage-apikey/apikey-list)
+1. **Node.js** (v14+): For npx installation - [nodejs.org](https://nodejs.org/)
+2. **Claude Code**: Install from [anthropic.com/claude-code](https://www.anthropic.com/claude-code)
+3. **Z.AI API Key**: Get your free key from [z.ai/manage-apikey/apikey-list](https://z.ai/manage-apikey/apikey-list)
+
+*Note: If you don't have Node.js, you can use the platform-specific installers (see Quick Start above)*
 
 ## Installation
 
-### Method 1: One-Line Install (Recommended)
+### Method 1: npx (Recommended - All Platforms)
+
+**One command for Windows, macOS, and Linux:**
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
+npx claude-glm-installer
 ```
 
 The installer will:
+- Auto-detect your operating system
 - Check if Claude Code is installed
 - Ask for your Z.AI API key
-- Create wrapper commands in `~/.local/bin`
-- Add convenient aliases to your shell
+- Create platform-appropriate wrapper scripts
+- Add convenient aliases to your shell/profile
 
-After installation, **activate the changes** (IMPORTANT!):
+After installation, **activate the changes**:
+
 ```bash
-source ~/.zshrc  # or ~/.bashrc, depending on your shell
+# macOS / Linux:
+source ~/.zshrc  # or ~/.bashrc
+
+# Windows PowerShell:
+. $PROFILE
 ```
 
-**⚠️ Don't skip the source step!** Without sourcing, the commands won't be available in your current terminal.
+### Method 2: Platform-Specific Installers
 
-### Method 2: Clone and Install
+<details>
+<summary>macOS / Linux</summary>
 
-If you prefer to review the code first:
-
+**One-Line Install:**
 ```bash
-# 1. Clone the repository
-git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
-cd claude-glm-wrapper
-
-# 2. Run the installer
-bash install.sh
-
-# 3. Activate
+bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/powershell/install.sh)
 source ~/.zshrc  # or ~/.bashrc
 ```
+
+**Clone and Install:**
+```bash
+git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
+cd claude-glm-wrapper
+bash install.sh
+source ~/.zshrc
+```
+
+</details>
+
+<details>
+<summary>Windows (PowerShell)</summary>
+
+**One-Line Install:**
+```powershell
+iwr -useb https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/powershell/install.ps1 | iex
+. $PROFILE
+```
+
+**Clone and Install:**
+```powershell
+git clone https://github.com/JoeInnsp23/claude-glm-wrapper.git
+cd claude-glm-wrapper
+.\install.ps1
+. $PROFILE
+```
+
+**Note:** If you get an execution policy error, run:
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+</details>
 
 ## Usage
 
@@ -188,12 +252,21 @@ cc
 
 Each wrapper uses its own configuration directory to prevent conflicts:
 
+**macOS / Linux:**
 | Command | Config Directory | Purpose |
 |---------|-----------------|---------|
 | `claude-glm` | `~/.claude-glm/` | GLM-4.6 settings and history |
 | `claude-glm-4.5` | `~/.claude-glm-45/` | GLM-4.5 settings and history |
 | `claude-glm-fast` | `~/.claude-glm-fast/` | GLM-4.5-Air settings and history |
 | `claude` | `~/.claude/` (default) | Your original Claude setup |
+
+**Windows:**
+| Command | Config Directory | Purpose |
+|---------|-----------------|---------|
+| `claude-glm` | `%USERPROFILE%\.claude-glm\` | GLM-4.6 settings and history |
+| `claude-glm-4.5` | `%USERPROFILE%\.claude-glm-45\` | GLM-4.5 settings and history |
+| `claude-glm-fast` | `%USERPROFILE%\.claude-glm-fast\` | GLM-4.5-Air settings and history |
+| `claude` | `%USERPROFILE%\.claude\` (default) | Your original Claude setup |
 
 **This means:**
 - ✅ Your original Claude settings are **never touched**
@@ -202,32 +275,51 @@ Each wrapper uses its own configuration directory to prevent conflicts:
 
 ### Wrapper Scripts Location
 
-The installer creates wrapper scripts in `~/.local/bin/`:
-- `~/.local/bin/claude-glm` (GLM-4.6)
-- `~/.local/bin/claude-glm-4.5` (GLM-4.5)
-- `~/.local/bin/claude-glm-fast` (GLM-4.5-Air)
+**macOS / Linux:** `~/.local/bin/`
+- `claude-glm` (GLM-4.6)
+- `claude-glm-4.5` (GLM-4.5)
+- `claude-glm-fast` (GLM-4.5-Air)
 
-These are just tiny bash scripts that set the right environment variables before launching Claude Code.
+**Windows:** `%USERPROFILE%\.local\bin\`
+- `claude-glm.ps1` (GLM-4.6)
+- `claude-glm-4.5.ps1` (GLM-4.5)
+- `claude-glm-fast.ps1` (GLM-4.5-Air)
+
+These are just tiny wrapper scripts (bash or PowerShell) that set the right environment variables before launching Claude Code.
 
 ## Updating Your API Key
 
-### Option 1: Use the Installer (Easiest)
+### macOS / Linux
+
+**Option 1: Use the Installer**
 ```bash
-# If you cloned the repo:
 cd claude-glm-wrapper && bash install.sh
-
-# Or use the one-liner again:
-bash <(curl -fsSL https://raw.githubusercontent.com/JoeInnsp23/claude-glm-wrapper/main/install.sh)
-
 # Choose option "1) Update API key only"
 ```
 
-### Option 2: Edit Manually
+**Option 2: Edit Manually**
 ```bash
 nano ~/.local/bin/claude-glm
 nano ~/.local/bin/claude-glm-4.5
 nano ~/.local/bin/claude-glm-fast
 # Find and replace ANTHROPIC_AUTH_TOKEN value
+```
+
+### Windows (PowerShell)
+
+**Option 1: Use the Installer**
+```powershell
+cd claude-glm-wrapper
+.\install.ps1
+# Choose option "1) Update API key only"
+```
+
+**Option 2: Edit Manually**
+```powershell
+notepad "$env:USERPROFILE\.local\bin\claude-glm.ps1"
+notepad "$env:USERPROFILE\.local\bin\claude-glm-4.5.ps1"
+notepad "$env:USERPROFILE\.local\bin\claude-glm-fast.ps1"
+# Find and replace $ZaiApiKey value
 ```
 
 ## How It Works (Technical Details)
@@ -283,6 +375,32 @@ source ~/.zshrc  # or ~/.bashrc
 - Exit any running Claude Code session
 - Start fresh with the command you want (`ccg`, `ccg45`, `ccf`, or `cc`)
 
+### 🪟 Windows-Specific Issues
+
+**❌ "cannot be loaded because running scripts is disabled"**
+
+**Problem**: PowerShell execution policy prevents running scripts.
+
+**Solution**:
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+**❌ "ccg: The term 'ccg' is not recognized"**
+
+**Problem**: PowerShell profile wasn't reloaded after installation.
+
+**Solutions**:
+1. Reload profile: `. $PROFILE`
+2. Or restart PowerShell
+3. Or run the full command: `claude-glm`
+
+**❌ PATH not updated**
+
+**Problem**: The `~/.local/bin` or `$env:USERPROFILE\.local\bin` directory isn't in your PATH.
+
+**Solution**: The installer adds it automatically, but you may need to restart PowerShell for it to take effect.
+
 ### 💡 General Tips
 
 - **Open new terminal**: After installation, aliases work in new terminals automatically
@@ -291,24 +409,25 @@ source ~/.zshrc  # or ~/.bashrc
 
 ## Uninstallation
 
-### Quick Uninstall
+### macOS / Linux
 
+**Remove wrapper scripts:**
 ```bash
-# Remove wrapper scripts
 rm ~/.local/bin/claude-glm
 rm ~/.local/bin/claude-glm-4.5
 rm ~/.local/bin/claude-glm-fast
+```
 
-# Remove config directories (optional - deletes chat history)
+**Remove config directories** (optional - deletes chat history):
+```bash
 rm -rf ~/.claude-glm
 rm -rf ~/.claude-glm-45
 rm -rf ~/.claude-glm-fast
 ```
 
-### Remove Aliases
-
-Edit your shell config file and remove these lines:
+**Remove aliases** from `~/.zshrc` or `~/.bashrc`:
 ```bash
+# Delete these lines:
 # Claude Code Model Switcher Aliases
 alias cc='claude'
 alias ccg='claude-glm'
@@ -316,9 +435,36 @@ alias ccg45='claude-glm-4.5'
 alias ccf='claude-glm-fast'
 ```
 
-**Files to check**: `~/.zshrc` or `~/.bashrc`
+Then run: `source ~/.zshrc`
 
-After removing, run: `source ~/.zshrc` (or your shell's rc file)
+### Windows (PowerShell)
+
+**Remove wrapper scripts:**
+```powershell
+Remove-Item "$env:USERPROFILE\.local\bin\claude-glm.ps1"
+Remove-Item "$env:USERPROFILE\.local\bin\claude-glm-4.5.ps1"
+Remove-Item "$env:USERPROFILE\.local\bin\claude-glm-fast.ps1"
+```
+
+**Remove config directories** (optional - deletes chat history):
+```powershell
+Remove-Item -Recurse "$env:USERPROFILE\.claude-glm"
+Remove-Item -Recurse "$env:USERPROFILE\.claude-glm-45"
+Remove-Item -Recurse "$env:USERPROFILE\.claude-glm-fast"
+```
+
+**Remove aliases** from PowerShell profile:
+```powershell
+notepad $PROFILE
+# Delete these lines:
+# Claude Code Model Switcher Aliases
+Set-Alias cc claude
+Set-Alias ccg claude-glm
+Set-Alias ccg45 claude-glm-4.5
+Set-Alias ccf claude-glm-fast
+```
+
+Then reload: `. $PROFILE`
 
 ## FAQ
 
@@ -336,10 +482,10 @@ After removing, run: `source ~/.zshrc` (or your shell's rc file)
 - Use **`cc` (Claude)** for: Your regular Anthropic Claude setup
 
 ### Q: Is this secure?
-**A**: Yes! Your API keys are stored locally on your machine in plain bash scripts (just like Claude Code's default config). Keep your `~/.local/bin` directory permissions secure.
+**A**: Yes! Your API keys are stored locally on your machine in wrapper scripts (bash or PowerShell, depending on your OS). Keep your scripts directory secure with appropriate permissions.
 
 ### Q: Does this work on Windows?
-**A**: Not yet. This is designed for Unix/Linux/macOS. Windows users could try WSL (Windows Subsystem for Linux).
+**A**: Yes! Use the PowerShell installer (install.ps1). Windows, macOS, and Linux are all fully supported.
 
 ### Q: Can I use a different Z.AI model?
 **A**: Yes! Edit the wrapper scripts in `~/.local/bin/` and change the `ANTHROPIC_MODEL` variable to any model Z.AI supports.
