@@ -20,5 +20,8 @@ test/
 # Documentation (already in README)
 docs/
 
+# Internal development documentation
+DEVELOPMENT.md
+
 # Universal bootstrap (not needed for npm)
 install

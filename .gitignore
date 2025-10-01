@@ -47,3 +47,6 @@ personal-*
 .claude/
 .claude-glm/
 .claude-glm-fast/
+
+# Internal development documentation
+DEVELOPMENT.md
