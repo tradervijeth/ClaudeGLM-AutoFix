@@ -1,6 +1,11 @@
 # Claude-GLM PowerShell Installer for Windows
 # Works without admin rights, installs to user's profile directory
 
+param(
+    [switch]$TestError,
+    [switch]$Debug
+)
+
 # Configuration
 $UserBinDir = "$env:USERPROFILE\.local\bin"
 $GlmConfigDir = "$env:USERPROFILE\.claude-glm"
@@ -8,8 +13,17 @@ $Glm45ConfigDir = "$env:USERPROFILE\.claude-glm-45"
 $GlmFastConfigDir = "$env:USERPROFILE\.claude-glm-fast"
 $ZaiApiKey = "YOUR_ZAI_API_KEY_HERE"
 
+# Debug logging
+function Write-DebugLog {
+    param([string]$Message)
+    if ($Debug) {
+        Write-Host "[DEBUG] $Message" -ForegroundColor Gray
+    }
+}
+
 # Find all existing wrapper installations
 function Find-AllInstallations {
+    Write-DebugLog "Searching for existing installations..."
     $locations = @(
         "$env:USERPROFILE\.local\bin",
         "$env:ProgramFiles\Claude-GLM",
@@ -20,15 +34,23 @@ function Find-AllInstallations {
     $foundFiles = @()
 
     foreach ($location in $locations) {
+        Write-DebugLog "Checking location: $location"
         if (Test-Path $location) {
             # Find all claude-glm*.ps1 files in this location
-            $files = Get-ChildItem -Path $location -Filter "claude-glm*.ps1" -ErrorAction SilentlyContinue
-            foreach ($file in $files) {
-                $foundFiles += $file.FullName
+            try {
+                $files = Get-ChildItem -Path $location -Filter "claude-glm*.ps1" -ErrorAction Stop
+                foreach ($file in $files) {
+                    Write-DebugLog "Found: $($file.FullName)"
+                    $foundFiles += $file.FullName
+                }
+            } catch {
+                Write-DebugLog "Could not access $location : $_"
+                # Continue searching other locations
             }
         }
     }
 
+    Write-DebugLog "Total installations found: $($foundFiles.Count)"
     return $foundFiles
 }
 
@@ -135,7 +157,16 @@ function Add-PowerShellAliases {
     }
 
     # Read current profile
-    $profileContent = Get-Content $PROFILE -ErrorAction SilentlyContinue
+    $profileContent = @()
+    if (Test-Path $PROFILE) {
+        try {
+            $profileContent = Get-Content $PROFILE -ErrorAction Stop
+            Write-DebugLog "Read existing profile with $($profileContent.Count) lines"
+        } catch {
+            Write-DebugLog "Could not read profile: $_"
+            $profileContent = @()
+        }
+    }
 
     # Remove old aliases if they exist
     $filteredContent = $profileContent | Where-Object {
@@ -424,25 +455,73 @@ function Report-Error {
     $issueBody += "`n---`n"
     $issueBody += "*This error was automatically reported by the installer. Please add any additional context below.*"
 
-    # URL encode the body (PowerShell 5+ compatible)
-    Add-Type -AssemblyName System.Web
-    $encodedBody = [System.Web.HttpUtility]::UrlEncode($issueBody)
-    $encodedTitle = [System.Web.HttpUtility]::UrlEncode("Installation Error: Windows PowerShell")
+    # URL encode the body (native PowerShell method, no dependencies)
+    Write-DebugLog "Encoding error report for URL..."
+
+    # Truncate body if too long (GitHub has URL limits)
+    if ($issueBody.Length -gt 5000) {
+        $issueBody = $issueBody.Substring(0, 5000) + "`n`n[Report truncated due to length]"
+        Write-DebugLog "Truncated error report to 5000 characters"
+    }
+
+    # Use native PowerShell URL encoding
+    $encodedBody = [uri]::EscapeDataString($issueBody)
+    $encodedTitle = [uri]::EscapeDataString("Installation Error: Windows PowerShell")
 
     $issueUrl = "https://github.com/JoeInnsp23/claude-glm-wrapper/issues/new?title=$encodedTitle&body=$encodedBody&labels=bug,windows,installation"
 
     Write-Host "📋 Error details have been prepared for reporting."
     Write-Host ""
-    Write-Host "Please report this error by opening the following URL:"
-    Write-Host $issueUrl -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "Attempting to open in your browser..." -ForegroundColor Gray
 
+    # Try multiple methods to open the browser
+    $browserOpened = $false
+
+    Write-DebugLog "Attempting to open browser with Start-Process..."
     try {
-        Start-Process $issueUrl
+        Start-Process $issueUrl -ErrorAction Stop
+        $browserOpened = $true
         Write-Host "✅ Browser opened. Please submit the GitHub issue." -ForegroundColor Green
     } catch {
-        Write-Host "⚠️  Could not open browser automatically. Please copy and paste the URL above." -ForegroundColor Yellow
+        Write-DebugLog "Start-Process failed: $_"
+    }
+
+    if (-not $browserOpened) {
+        Write-DebugLog "Attempting to open browser with cmd /c start..."
+        try {
+            & cmd /c start $issueUrl 2>$null
+            if ($LASTEXITCODE -eq 0) {
+                $browserOpened = $true
+                Write-Host "✅ Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+            }
+        } catch {
+            Write-DebugLog "cmd /c start failed: $_"
+        }
+    }
+
+    if (-not $browserOpened) {
+        Write-DebugLog "Attempting to open browser with explorer.exe..."
+        try {
+            & explorer.exe $issueUrl
+            $browserOpened = $true
+            Write-Host "✅ Browser opened. Please submit the GitHub issue." -ForegroundColor Green
+        } catch {
+            Write-DebugLog "explorer.exe failed: $_"
+        }
+    }
+
+    if (-not $browserOpened) {
+        Write-Host "⚠️  Could not open browser automatically." -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "Please copy and open this URL manually:" -ForegroundColor Yellow
+        Write-Host $issueUrl -ForegroundColor Cyan
+        Write-Host ""
+        Write-Host "Or press Enter to see a shortened URL..." -ForegroundColor Gray
+        $null = Read-Host
+
+        # Create a shorter URL with just the title
+        $shortUrl = "https://github.com/JoeInnsp23/claude-glm-wrapper/issues/new?title=$encodedTitle&labels=bug,windows,installation"
+        Write-Host "Shortened URL (add error details manually):" -ForegroundColor Yellow
+        Write-Host $shortUrl -ForegroundColor Cyan
     }
 
     Write-Host ""
@@ -459,13 +538,23 @@ function Install-ClaudeGlm {
     Write-Host "  • Works on Windows systems"
     Write-Host ""
 
+    if ($Debug) {
+        Write-Host "🐛 Debug mode enabled" -ForegroundColor Gray
+        Write-Host ""
+    }
+
+    Write-DebugLog "Starting installation process..."
+
     # Check Claude Code
+    Write-DebugLog "Checking Claude Code installation..."
     Test-ClaudeInstallation
 
     # Setup user bin directory
+    Write-DebugLog "Setting up user bin directory..."
     Setup-UserBin
 
     # Clean up old installations from different locations
+    Write-DebugLog "Checking for old installations..."
     Remove-OldWrappers
 
     # Check if already installed
@@ -560,9 +649,30 @@ function Install-ClaudeGlm {
     Write-Host "📁 Config directories: $GlmConfigDir, $Glm45ConfigDir, $GlmFastConfigDir"
 }
 
+# Test error functionality if requested
+if ($TestError) {
+    Write-Host "🧪 Testing error reporting functionality..." -ForegroundColor Magenta
+    Write-Host ""
+
+    # Create a test error
+    $testErrorMessage = "This is a test error to verify error reporting works correctly"
+    $testErrorLine = "Test mode - no actual error"
+
+    # Create a mock error record
+    try {
+        throw $testErrorMessage
+    } catch {
+        Report-Error -ErrorMessage $testErrorMessage -ErrorLine $testErrorLine -ErrorRecord $_
+    }
+
+    Write-Host "✅ Test complete. If a browser window opened, error reporting is working!" -ForegroundColor Green
+    exit 0
+}
+
 # Run installation with error handling
 try {
     $ErrorActionPreference = "Stop"
+    Write-DebugLog "Starting installation with ErrorActionPreference = Stop"
     Install-ClaudeGlm
 } catch {
     $errorMessage = $_.Exception.Message
@@ -572,6 +682,7 @@ try {
         "Unknown location"
     }
 
+    Write-DebugLog "Caught error: $errorMessage at $errorLine"
     Report-Error -ErrorMessage $errorMessage -ErrorLine $errorLine -ErrorRecord $_
     exit 1
 }
