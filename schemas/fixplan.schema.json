@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claude-glm-wrapper/schema/fixplan.json",
+  "title": "FixPlan",
+  "type": "object",
+  "required": [
+    "plan_version",
+    "overview",
+    "tasks",
+    "tests",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "plan_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "overview": {
+      "type": "object",
+      "required": [
+        "primary_issue",
+        "risk_level",
+        "summary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "primary_issue": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Concise statement of the main failure Claude is addressing."
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Subjective risk assessment for the proposed changes."
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "description": "One paragraph (<= 280 characters) summarizing the recovery strategy."
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true,
+          "description": "Optional list of assumptions or unknowns that require validation."
+        }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "$ref": "#/$defs/task"
+      }
+    },
+    "tests": {
+      "type": "object",
+      "required": ["commands", "stop_on_failure"],
+      "additionalProperties": false,
+      "properties": {
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "Ordered list of build/test commands to run after all tasks complete."
+        },
+        "stop_on_failure": {
+          "type": "boolean",
+          "description": "If true, halt the pipeline after the first failing command."
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "default": 1,
+          "description": "Optional number of times to attempt repairs before giving up."
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["created_at", "model", "fix_attempt"],
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "UTC timestamp when the plan was produced."
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Claude model identifier."
+        },
+        "fix_attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of the orchestrator attempt that requested this plan."
+        }
+      }
+    }
+  },
+  "$defs": {
+    "task": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "rationale",
+        "acceptance",
+        "edits"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^T[0-9]+$",
+          "description": "Stable identifier for cross-referencing edits and dependencies."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short imperative task label."
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Why this task is needed."
+        },
+        "acceptance": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Conditions that must be true after GLM applies the task."
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^T[0-9]+$"
+          },
+          "description": "Other tasks that must complete before this one."
+        },
+        "edits": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/edit"
+          }
+        },
+        "post_checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Optional task-specific checks to perform before moving on."
+        }
+      }
+    },
+    "edit": {
+      "type": "object",
+      "required": [
+        "action",
+        "path",
+        "instructions"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "modify_file",
+            "create_file",
+            "delete_file",
+            "rename_file"
+          ],
+          "description": "Type of change GLM must perform."
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Relative file path (POSIX)."
+        },
+        "target": {
+          "type": "string",
+          "enum": ["swift", "plist", "markdown", "other"],
+          "description": "File type hint for prompt templating."
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Exact guidance for GLM explaining what to change."
+        },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "unified_patch",
+            "file_rewrite"
+          ],
+          "description": "Preferred output format from GLM."
+        },
+        "context_files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": "Additional files that should accompany the edit when sent to GLM."
+        },
+        "target_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Destination path used when action is rename_file."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Any extra clarifications for the executor."
+        }
+      }
+    }
+  }
+}
